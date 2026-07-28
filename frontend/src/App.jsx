@@ -1,9 +1,13 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Landing from "./pages/Landing";
+
 function App() {
   return (
-    <div>
-      <h1>Collabify</h1>
-      <p>Where Skills Meet Ideas.</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
