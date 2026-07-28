@@ -5,6 +5,7 @@ import HowItWorks from "../components/HowItWorks";
 import Features from "../components/Features";
 import FeaturedProjects from "../components/FeaturedProjects";
 import CallToAction from "../components/CallToAction";
+import Footer from "../components/Footer";
 
 function Landing() {
   return (
@@ -16,6 +17,7 @@ function Landing() {
       <Features />
       <FeaturedProjects />
       <CallToAction />
+      <Footer />
     </div>
   );
 }
