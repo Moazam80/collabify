@@ -4,6 +4,7 @@ import Intro from "../components/Intro";
 import HowItWorks from "../components/HowItWorks";
 import Features from "../components/Features";
 import FeaturedProjects from "../components/FeaturedProjects";
+import CallToAction from "../components/CallToAction";
 
 function Landing() {
   return (
@@ -14,6 +15,7 @@ function Landing() {
       <HowItWorks />
       <Features />
       <FeaturedProjects />
+      <CallToAction />
     </div>
   );
 }
