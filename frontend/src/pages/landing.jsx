@@ -1,13 +1,11 @@
 import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
 
 function Landing() {
   return (
     <div>
       <Navbar />
-      <div style={{ padding: "40px" }}>
-        <h1>Collabify</h1>
-        <p>Where Skills Meet Ideas.</p>
-      </div>
+      <Hero />
     </div>
   );
 }
