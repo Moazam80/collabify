@@ -73,32 +73,48 @@ function Login() {
 
           {/* Password Field */}
           <div style={{ marginBottom: "24px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "var(--font-size-small)",
-                fontWeight: "600",
-                marginBottom: "6px",
-              }}
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                height: "44px",
-                padding: "12px 16px",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-                fontSize: "var(--font-size-base)",
-              }}
-              placeholder="••••••••"
-            />
-          </div>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "6px",
+    }}
+  >
+    <label
+      style={{
+        fontSize: "var(--font-size-small)",
+        fontWeight: "600",
+      }}
+    >
+      Password
+    </label>
+    <Link
+      to="/forgot-password"
+      style={{
+        fontSize: "var(--font-size-caption)",
+        color: "var(--color-primary)",
+      }}
+    >
+      Forgot Password?
+    </Link>
+  </div>
+  <input
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+    style={{
+      width: "100%",
+      height: "44px",
+      padding: "12px 16px",
+      border: "1px solid var(--color-border)",
+      borderRadius: "var(--radius-sm)",
+      fontSize: "var(--font-size-base)",
+    }}
+    placeholder="••••••••"
+  />
+</div>
 
           {/* Submit Button */}
           <button
