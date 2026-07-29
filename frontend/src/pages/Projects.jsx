@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 
@@ -56,6 +57,13 @@ const allProjects = [
 ];
 
 function Projects() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredProjects = allProjects.filter((project) =>
+    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
       <Navbar />
@@ -67,12 +75,29 @@ function Projects() {
           style={{
             fontSize: "var(--font-size-base)",
             color: "var(--color-text-secondary)",
-            marginBottom: "32px",
+            marginBottom: "24px",
           }}
         >
           Find a project that matches your skills and start collaborating.
         </p>
 
+        <input
+          type="text"
+          placeholder="Search projects by title or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: "100%",
+            maxWidth: "400px",
+            height: "44px",
+            padding: "12px 16px",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-sm)",
+            fontSize: "var(--font-size-base)",
+            marginBottom: "32px",
+            display: "block",
+          }}
+        />
         <div
           style={{
             display: "grid",
@@ -80,10 +105,22 @@ function Projects() {
             gap: "24px",
           }}
         >
-          {allProjects.map((project) => (
+         {filteredProjects.map((project) => (
             <ProjectCard key={project.title} project={project} />
           ))}
         </div>
+
+        {filteredProjects.length === 0 && (
+          <p
+            style={{
+              textAlign: "center",
+              color: "var(--color-text-secondary)",
+              padding: "48px 0",
+            }}
+          >
+            No projects match your search. Try a different keyword.
+          </p>
+        )}
       </div>
     </div>
   );
