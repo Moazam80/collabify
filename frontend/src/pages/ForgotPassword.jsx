@@ -5,12 +5,17 @@ import Navbar from "../components/Navbar";
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
     console.log("Password reset requested for:", email);
-    // Real email-sending logic will be connected in Phase 12+
-    setSubmitted(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 1000);
   }
 
   const inputStyle = {
@@ -86,6 +91,7 @@ function ForgotPassword() {
 
               <button
                 type="submit"
+                disabled={loading}
                 style={{
                   width: "100%",
                   background: "var(--color-primary)",
@@ -94,9 +100,11 @@ function ForgotPassword() {
                   borderRadius: "var(--radius-sm)",
                   fontWeight: "600",
                   fontSize: "var(--font-size-base)",
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? "not-allowed" : "pointer",
                 }}
               >
-                Send Reset Link
+                {loading ? "Sending..." : "Send Reset Link"}
               </button>
             </form>
           ) : (

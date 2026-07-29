@@ -10,6 +10,7 @@ function Register() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,8 +25,12 @@ function Register() {
       return;
     }
 
+    setLoading(true);
     console.log("Register attempt:", formData);
-    // Real registration logic will be connected in Phase 14
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
   }
 
   const inputStyle = {
@@ -74,7 +79,6 @@ function Register() {
             Create Your Collabify Account
           </h2>
 
-          {/* Error Banner */}
           {error && (
             <div
               style={{
@@ -91,7 +95,6 @@ function Register() {
             </div>
           )}
 
-          {/* Name */}
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Full Name</label>
             <input
@@ -105,7 +108,6 @@ function Register() {
             />
           </div>
 
-          {/* Email */}
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Email</label>
             <input
@@ -119,7 +121,6 @@ function Register() {
             />
           </div>
 
-          {/* Password */}
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Password</label>
             <input
@@ -133,7 +134,6 @@ function Register() {
             />
           </div>
 
-          {/* Confirm Password */}
           <div style={{ marginBottom: "24px" }}>
             <label style={labelStyle}>Confirm Password</label>
             <input
@@ -147,9 +147,9 @@ function Register() {
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
               background: "var(--color-primary)",
@@ -159,9 +159,11 @@ function Register() {
               fontWeight: "600",
               fontSize: "var(--font-size-base)",
               marginBottom: "16px",
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            Sign Up
+            {loading ? "Creating account..." : "Sign Up"}
           </button>
 
           <p

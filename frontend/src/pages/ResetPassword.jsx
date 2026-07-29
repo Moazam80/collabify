@@ -7,6 +7,7 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -22,9 +23,13 @@ function ResetPassword() {
       return;
     }
 
+    setLoading(true);
     console.log("Password reset to:", password);
-    // Real reset logic (with token) will be connected in Phase 15
-    setSuccess(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(true);
+    }, 1000);
   }
 
   const inputStyle = {
@@ -126,6 +131,7 @@ function ResetPassword() {
 
               <button
                 type="submit"
+                disabled={loading}
                 style={{
                   width: "100%",
                   background: "var(--color-primary)",
@@ -134,9 +140,11 @@ function ResetPassword() {
                   borderRadius: "var(--radius-sm)",
                   fontWeight: "600",
                   fontSize: "var(--font-size-base)",
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? "not-allowed" : "pointer",
                 }}
               >
-                Reset Password
+                {loading ? "Resetting..." : "Reset Password"}
               </button>
             </form>
           ) : (

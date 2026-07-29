@@ -5,11 +5,16 @@ import Navbar from "../components/Navbar";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
     console.log("Login attempt:", { email, password });
-    // Real login logic will be connected in Phase 14
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
   }
 
   return (
@@ -42,7 +47,6 @@ function Login() {
             Log In to Collabify
           </h2>
 
-          {/* Email Field */}
           <div style={{ marginBottom: "16px" }}>
             <label
               style={{
@@ -71,54 +75,53 @@ function Login() {
             />
           </div>
 
-          {/* Password Field */}
           <div style={{ marginBottom: "24px" }}>
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: "6px",
-    }}
-  >
-    <label
-      style={{
-        fontSize: "var(--font-size-small)",
-        fontWeight: "600",
-      }}
-    >
-      Password
-    </label>
-    <Link
-      to="/forgot-password"
-      style={{
-        fontSize: "var(--font-size-caption)",
-        color: "var(--color-primary)",
-      }}
-    >
-      Forgot Password?
-    </Link>
-  </div>
-  <input
-    type="password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    required
-    style={{
-      width: "100%",
-      height: "44px",
-      padding: "12px 16px",
-      border: "1px solid var(--color-border)",
-      borderRadius: "var(--radius-sm)",
-      fontSize: "var(--font-size-base)",
-    }}
-    placeholder="••••••••"
-  />
-</div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "6px",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: "var(--font-size-small)",
+                  fontWeight: "600",
+                }}
+              >
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                style={{
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-primary)",
+                }}
+              >
+                Forgot Password?
+              </Link>
+            </div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                height: "44px",
+                padding: "12px 16px",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "var(--font-size-base)",
+              }}
+              placeholder="••••••••"
+            />
+          </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
               background: "var(--color-primary)",
@@ -128,9 +131,11 @@ function Login() {
               fontWeight: "600",
               fontSize: "var(--font-size-base)",
               marginBottom: "16px",
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            Log In
+            {loading ? "Logging in..." : "Log In"}
           </button>
 
           <p
