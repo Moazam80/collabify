@@ -1,15 +1,17 @@
+import { Link } from "react-router-dom";
 function ProjectCard({ project }) {
   return (
-    <div
+    <Link
+      to={`/projects/${encodeURIComponent(project.title)}`}
       style={{
         background: "var(--color-background)",
         border: "1px solid var(--color-border)",
         borderRadius: "var(--radius-md)",
         padding: "20px",
         textAlign: "left",
+        display: "block",
       }}
     >
-      {/* Category + Status */}
       <div
         style={{
           display: "flex",
@@ -91,7 +93,7 @@ function ProjectCard({ project }) {
           👥 {project.teamCount}/{project.maxTeamSize}
         </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
