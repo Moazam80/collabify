@@ -12,6 +12,7 @@ import CreateProject from "./pages/CreateProject";
 import EditProject from "./pages/EditProject";
 import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
+import MyProjects from "./pages/MyProjects";
 import DashboardLayout from "./layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -33,10 +34,11 @@ function App() {
         <Route path="/feed" element={<Feed />} />
 
         {/* Dashboard routes — all share the Sidebar layout */}
+        {/* Dashboard routes — all share the Sidebar layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="my-projects" element={<MyProjects />} />
         </Route>
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
