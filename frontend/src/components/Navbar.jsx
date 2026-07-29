@@ -10,6 +10,8 @@ function Navbar() {
         padding: "16px 32px",
         borderBottom: "1px solid var(--color-border)",
         background: "var(--color-background)",
+        flexWrap: "wrap",
+    gap: "12px",
       }}
     >
       {/* Logo */}
