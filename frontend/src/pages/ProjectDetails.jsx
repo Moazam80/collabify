@@ -1,4 +1,5 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 
 // Same dummy data as Projects.jsx — in Phase 14 this comes from one shared API/database
@@ -57,8 +58,19 @@ const allProjects = [
 
 function ProjectDetails() {
   const { title } = useParams();
+  const navigate = useNavigate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const project = allProjects.find((p) => p.title === decodeURIComponent(title));
 
+  // MVP mock check: assume logged-in user is "Ayesha K." (real auth comes in Phase 15)
+  const currentUser = "Ayesha K.";
+  const isOwner = project && project.owner === currentUser;
+
+  function handleDelete() {
+    console.log("Project deleted:", project.title);
+    // Real delete API call will be connected in Phase 14
+    navigate("/projects");
+  }
   if (!project) {
     return (
       <div>
@@ -170,20 +182,100 @@ function ProjectDetails() {
           </div>
 
           {/* Join Button */}
-          <button
-            style={{
-              width: "100%",
-              background: "var(--color-primary)",
-              color: "#fff",
-              padding: "14px",
-              borderRadius: "var(--radius-sm)",
-              fontWeight: "600",
-              fontSize: "var(--font-size-base)",
-            }}
-            onClick={() => console.log("Join request sent for:", project.title)}
-          >
-            Request to Join
-          </button>
+          {isOwner ? (
+            <div style={{ display: "flex", gap: "12px" }}>
+              <Link
+                to={`/projects/${encodeURIComponent(project.title)}/edit`}
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  background: "var(--color-primary)",
+                  color: "#fff",
+                  padding: "14px",
+                  borderRadius: "var(--radius-sm)",
+                  fontWeight: "600",
+                  fontSize: "var(--font-size-base)",
+                }}
+              >
+                Edit Project
+              </Link>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "1px solid var(--color-danger)",
+                  color: "var(--color-danger)",
+                  padding: "14px",
+                  borderRadius: "var(--radius-sm)",
+                  fontWeight: "600",
+                  fontSize: "var(--font-size-base)",
+                }}
+              >
+                Delete Project
+              </button>
+            </div>
+          ) : (
+            <button
+              style={{
+                width: "100%",
+                background: "var(--color-primary)",
+                color: "#fff",
+                padding: "14px",
+                borderRadius: "var(--radius-sm)",
+                fontWeight: "600",
+                fontSize: "var(--font-size-base)",
+              }}
+              onClick={() => console.log("Join request sent for:", project.title)}
+            >
+              Request to Join
+            </button>
+          )}
+
+          {/* Delete Confirmation */}
+          {showDeleteConfirm && (
+            <div
+              style={{
+                marginTop: "16px",
+                background: "#FEE2E2",
+                border: "1px solid var(--color-danger)",
+                borderRadius: "var(--radius-sm)",
+                padding: "16px",
+              }}
+            >
+              <p style={{ fontSize: "var(--font-size-small)", color: "#991B1B", marginBottom: "12px" }}>
+                Are you sure you want to delete this project? This cannot be undone.
+              </p>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={handleDelete}
+                  style={{
+                    background: "var(--color-danger)",
+                    color: "#fff",
+                    padding: "8px 16px",
+                    borderRadius: "var(--radius-sm)",
+                    fontWeight: "600",
+                    fontSize: "var(--font-size-small)",
+                  }}
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--color-border)",
+                    padding: "8px 16px",
+                    borderRadius: "var(--radius-sm)",
+                    fontWeight: "600",
+                    fontSize: "var(--font-size-small)",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
