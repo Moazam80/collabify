@@ -13,6 +13,10 @@ const allProjects = [
     owner: "Ayesha K.",
     teamCount: 2,
     maxTeamSize: 5,
+    teamMembers: [
+      { name: "Ayesha K.", role: "Project Owner" },
+      { name: "Hamza T.", role: "Python Developer" },
+    ],
   },
   {
     title: "Campus Event Finder",
@@ -23,6 +27,11 @@ const allProjects = [
     owner: "Bilal R.",
     teamCount: 3,
     maxTeamSize: 4,
+    teamMembers: [
+      { name: "Bilal R.", role: "Project Owner" },
+      { name: "Sara M.", role: "Frontend Developer" },
+      { name: "Zainab A.", role: "Backend Developer" },
+    ],
   },
   {
     title: "Freelance Portfolio Builder",
@@ -33,6 +42,7 @@ const allProjects = [
     owner: "Sara M.",
     teamCount: 1,
     maxTeamSize: 3,
+    teamMembers: [{ name: "Sara M.", role: "Project Owner" }],
   },
   {
     title: "Expense Tracker App",
@@ -43,6 +53,10 @@ const allProjects = [
     owner: "Hamza T.",
     teamCount: 2,
     maxTeamSize: 4,
+    teamMembers: [
+      { name: "Hamza T.", role: "Project Owner" },
+      { name: "Ayesha K.", role: "UI Designer" },
+    ],
   },
   {
     title: "Local Business Directory",
@@ -53,6 +67,12 @@ const allProjects = [
     owner: "Zainab A.",
     teamCount: 4,
     maxTeamSize: 4,
+    teamMembers: [
+      { name: "Zainab A.", role: "Project Owner" },
+      { name: "Bilal R.", role: "Backend Developer" },
+      { name: "Sara M.", role: "Frontend Developer" },
+      { name: "Hamza T.", role: "QA Tester" },
+    ],
   },
 ];
 
@@ -60,6 +80,7 @@ function ProjectDetails() {
   const { title } = useParams();
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const project = allProjects.find((p) => p.title === decodeURIComponent(title));
 
   // MVP mock check: assume logged-in user is "Ayesha K." (real auth comes in Phase 15)
@@ -173,12 +194,61 @@ function ProjectDetails() {
               fontSize: "var(--font-size-small)",
               color: "var(--color-text-secondary)",
               marginBottom: "24px",
-              paddingBottom: "24px",
-              borderBottom: "1px solid var(--color-border)",
             }}
           >
             <span>👤 Created by {project.owner}</span>
             <span>👥 {project.teamCount}/{project.maxTeamSize} members</span>
+          </div>
+
+          {/* Team Members List */}
+          <div
+            style={{
+              marginBottom: "24px",
+              paddingBottom: "24px",
+              borderBottom: "1px solid var(--color-border)",
+            }}
+          >
+            <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "10px" }}>
+              Team Members
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {project.teamMembers.map((member) => (
+                <div
+                  key={member.name}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "50%",
+                      background: "var(--color-primary-light)",
+                      color: "var(--color-primary)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "var(--font-size-caption)",
+                      fontWeight: "700",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {member.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>
+                      {member.name}
+                    </p>
+                    <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
+                      {member.role}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Join Button */}
@@ -217,18 +287,23 @@ function ProjectDetails() {
             </div>
           ) : (
             <button
+              disabled={requestSent}
               style={{
                 width: "100%",
-                background: "var(--color-primary)",
+                background: requestSent ? "var(--color-success)" : "var(--color-primary)",
                 color: "#fff",
                 padding: "14px",
                 borderRadius: "var(--radius-sm)",
                 fontWeight: "600",
                 fontSize: "var(--font-size-base)",
+                cursor: requestSent ? "default" : "pointer",
               }}
-              onClick={() => console.log("Join request sent for:", project.title)}
+              onClick={() => {
+                console.log("Join request sent for:", project.title);
+                setRequestSent(true);
+              }}
             >
-              Request to Join
+              {requestSent ? "✓ Request Sent" : "Request to Join"}
             </button>
           )}
 
