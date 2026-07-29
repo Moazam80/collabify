@@ -13,6 +13,10 @@ const dummyUser = {
     { school: "University of Punjab", degree: "BS Computer Science", year: "2022 - 2026" },
     { school: "Punjab College", degree: "Intermediate, Pre-Engineering", year: "2020 - 2022" },
   ],
+  experience: [
+    { company: "Devsinc", role: "Frontend Developer Intern", duration: "Jun 2025 - Aug 2025" },
+    { company: "Freelance", role: "UI/UX Designer", duration: "2024 - Present" },
+  ],
 };
 
 function Profile() {
@@ -137,6 +141,32 @@ function Profile() {
                 </p>
                 <p style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)" }}>
                   {edu.school} · {edu.year}
+                </p>
+              </div>
+            ))}
+         </div>
+        </div>
+
+        {/* Experience Section */}
+        <div
+          style={{
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-md)",
+            padding: "24px",
+            marginTop: "24px",
+          }}
+        >
+          <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
+            Experience
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {dummyUser.experience.map((exp, index) => (
+              <div key={index}>
+                <p style={{ fontSize: "var(--font-size-base)", fontWeight: "600" }}>
+                  {exp.role}
+                </p>
+                <p style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)" }}>
+                  {exp.company} · {exp.duration}
                 </p>
               </div>
             ))}
