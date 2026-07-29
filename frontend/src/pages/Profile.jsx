@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 
@@ -9,6 +10,7 @@ const dummyUser = {
   linkedinUrl: "https://linkedin.com/in/ayeshak",
   projectsCompleted: 4,
   projectsInProgress: 2,
+  followers: 128,
   skills: ["React", "JavaScript", "UI/UX Design", "Figma", "CSS", "Node.js"],
   education: [
     { school: "University of Punjab", degree: "BS Computer Science", year: "2022 - 2026" },
@@ -43,6 +45,18 @@ const dummyUserProjects = [
 ];
 
 function Profile() {
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(dummyUser.followers);
+
+  function handleFollowToggle() {
+    if (isFollowing) {
+      setFollowerCount(followerCount - 1);
+    } else {
+      setFollowerCount(followerCount + 1);
+    }
+    setIsFollowing(!isFollowing);
+  }
+
   return (
     <div>
       <Navbar />
@@ -93,25 +107,74 @@ function Profile() {
             </div>
           </div>
 
+          {/* Stats */}
           <div style={{ display: "flex", gap: "24px" }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "var(--font-size-h3)", fontWeight: "700", color: "var(--color-primary)" }}>
+              <div
+                style={{
+                  fontSize: "var(--font-size-h3)",
+                  fontWeight: "700",
+                  color: "var(--color-primary)",
+                }}
+              >
                 {dummyUser.projectsCompleted}
               </div>
-              <div style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
+              <div
+                style={{
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
                 Completed
               </div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "var(--font-size-h3)", fontWeight: "700", color: "var(--color-secondary)" }}>
+              <div
+                style={{
+                  fontSize: "var(--font-size-h3)",
+                  fontWeight: "700",
+                  color: "var(--color-secondary)",
+                }}
+              >
                 {dummyUser.projectsInProgress}
               </div>
-              <div style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
+              <div
+                style={{
+                  fontSize: "var(--font-size-caption)",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
                 In Progress
               </div>
             </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "var(--font-size-h3)", fontWeight: "700" }}>
+                {followerCount}
+              </div>
+              <div style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
+                Followers
+              </div>
+            </div>
           </div>
-    </div>
+        </div>
+
+        {/* Follow Button */}
+        <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={handleFollowToggle}
+            style={{
+              background: isFollowing ? "transparent" : "var(--color-primary)",
+              border: isFollowing ? "1px solid var(--color-border)" : "none",
+              color: isFollowing ? "var(--color-text-primary)" : "#fff",
+              padding: "10px 24px",
+              borderRadius: "var(--radius-sm)",
+              fontWeight: "600",
+              fontSize: "var(--font-size-small)",
+            }}
+          >
+            {isFollowing ? "✓ Following" : "+ Follow"}
+          </button>
+        </div>
 
         {/* Skills Section */}
         <div

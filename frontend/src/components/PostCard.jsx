@@ -53,6 +53,7 @@ function PostCard({ post }) {
       <div
         style={{
           display: "flex",
+          justifyContent: "space-between",
           gap: "20px",
           paddingTop: "12px",
           borderTop: "1px solid var(--color-border)",
@@ -78,6 +79,20 @@ function PostCard({ post }) {
         >
           💬 {post.commentsList.length}{" "}
           {post.commentsList.length === 1 ? "Comment" : "Comments"}
+        </button>
+
+        <button
+          style={{
+            fontSize: "var(--font-size-small)",
+            color: "var(--color-text-secondary)",
+            fontWeight: "600",
+          }}
+          onClick={() => {
+            navigator.clipboard.writeText(`Check out this post by ${post.author} on Collabify!`);
+            alert("Post link copied to clipboard!");
+          }}
+        >
+          🔗 Share
         </button>
       </div>
 
