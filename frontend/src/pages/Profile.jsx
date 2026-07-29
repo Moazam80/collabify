@@ -9,6 +9,10 @@ const dummyUser = {
   projectsCompleted: 4,
   projectsInProgress: 2,
   skills: ["React", "JavaScript", "UI/UX Design", "Figma", "CSS", "Node.js"],
+  education: [
+    { school: "University of Punjab", degree: "BS Computer Science", year: "2022 - 2026" },
+    { school: "Punjab College", degree: "Intermediate, Pre-Engineering", year: "2020 - 2022" },
+  ],
 };
 
 function Profile() {
@@ -109,6 +113,32 @@ function Profile() {
               >
                 {skill}
               </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Education Section */}
+        <div
+          style={{
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-md)",
+            padding: "24px",
+            marginTop: "24px",
+          }}
+        >
+          <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
+            Education
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {dummyUser.education.map((edu, index) => (
+              <div key={index}>
+                <p style={{ fontSize: "var(--font-size-base)", fontWeight: "600" }}>
+                  {edu.degree}
+                </p>
+                <p style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)" }}>
+                  {edu.school} · {edu.year}
+                </p>
+              </div>
             ))}
           </div>
         </div>
