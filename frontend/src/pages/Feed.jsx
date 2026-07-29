@@ -9,8 +9,11 @@ const initialPosts = [
     timeAgo: "2 hours ago",
     content: "Just shipped the first version of Campus Event Finder! Looking for a designer to help polish the UI. 🎉",
     likes: 12,
-    comments: 3,
     liked: false,
+    commentsList: [
+      { id: 1, author: "Sara M.", text: "Congrats! This looks great." },
+      { id: 2, author: "Zainab A.", text: "I'd love to help with the design!" },
+    ],
   },
   {
     id: 2,
@@ -18,8 +21,10 @@ const initialPosts = [
     timeAgo: "5 hours ago",
     content: "Wrapped up the Freelance Portfolio Builder project this week. Huge thanks to everyone who joined the team!",
     likes: 24,
-    comments: 6,
     liked: false,
+    commentsList: [
+      { id: 1, author: "Ayesha K.", text: "Amazing work team!" },
+    ],
   },
   {
     id: 3,
@@ -27,8 +32,8 @@ const initialPosts = [
     timeAgo: "1 day ago",
     content: "Looking for a React Native developer to join the Expense Tracker App. DM me if interested!",
     likes: 8,
-    comments: 2,
     liked: false,
+    commentsList: [],
   },
 ];
 
@@ -56,12 +61,28 @@ function Feed() {
       timeAgo: "Just now",
       content: newPost,
       likes: 0,
-      comments: 0,
       liked: false,
+      commentsList: [],
     };
 
     setPosts([newPostObject, ...posts]);
     setNewPost("");
+  }
+
+  function handleAddComment(postId, commentText) {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              commentsList: [
+                ...post.commentsList,
+                { id: Date.now(), author: "You", text: commentText },
+              ],
+            }
+          : post
+      )
+    );
   }
 
   return (
@@ -115,7 +136,10 @@ function Feed() {
 
         {/* Posts List */}
         {posts.map((post) => (
-          <PostCard key={post.id} post={{ ...post, onLike: handleLike }} />
+          <PostCard
+            key={post.id}
+            post={{ ...post, onLike: handleLike, onAddComment: handleAddComment }}
+          />
         ))}
       </div>
     </div>
