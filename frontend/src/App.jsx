@@ -11,6 +11,8 @@ import ProjectDetails from "./pages/ProjectDetails";
 import CreateProject from "./pages/CreateProject";
 import EditProject from "./pages/EditProject";
 import Feed from "./pages/Feed";
+import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -29,6 +31,12 @@ function App() {
         <Route path="/projects/:title/edit" element={<EditProject />} />
         <Route path="/projects/:title" element={<ProjectDetails />} />
         <Route path="/feed" element={<Feed />} />
+
+        {/* Dashboard routes — all share the Sidebar layout */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
