@@ -10,6 +10,7 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import CreateProject from "./pages/CreateProject";
 import EditProject from "./pages/EditProject";
+import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/projects/create" element={<CreateProject />} />
         <Route path="/projects/:title/edit" element={<EditProject />} />
         <Route path="/projects/:title" element={<ProjectDetails />} />
+        <Route path="/feed" element={<Feed />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
