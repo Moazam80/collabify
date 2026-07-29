@@ -1,4 +1,5 @@
 import Navbar from "../components/Navbar";
+import ProjectCard from "../components/ProjectCard";
 
 const dummyUser = {
   name: "Ayesha Khan",
@@ -18,6 +19,28 @@ const dummyUser = {
     { company: "Freelance", role: "UI/UX Designer", duration: "2024 - Present" },
   ],
 };
+const dummyUserProjects = [
+  {
+    title: "Portfolio Website Builder",
+    category: "Design Tool",
+    status: "Completed",
+    description: "A drag-and-drop tool for freelancers to build portfolio websites.",
+    skills: ["React", "Figma"],
+    owner: "Ayesha Khan",
+    teamCount: 3,
+    maxTeamSize: 3,
+  },
+  {
+    title: "Campus Event Finder",
+    category: "Web App",
+    status: "Active",
+    description: "A platform for students to discover and RSVP to campus events.",
+    skills: ["React", "Node.js"],
+    owner: "Ayesha Khan",
+    teamCount: 3,
+    maxTeamSize: 4,
+  },
+];
 
 function Profile() {
   return (
@@ -169,6 +192,24 @@ function Profile() {
                   {exp.company} · {exp.duration}
                 </p>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Project Portfolio Section */}
+        <div style={{ marginTop: "24px" }}>
+          <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
+            Project Portfolio
+          </h3>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "20px",
+            }}
+          >
+            {dummyUserProjects.map((project) => (
+              <ProjectCard key={project.title} project={project} />
             ))}
           </div>
         </div>
