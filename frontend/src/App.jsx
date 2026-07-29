@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
+import CreateProject from "./pages/CreateProject";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/edit" element={<EditProfile />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/create" element={<CreateProject />} />
         <Route path="/projects/:title" element={<ProjectDetails />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
