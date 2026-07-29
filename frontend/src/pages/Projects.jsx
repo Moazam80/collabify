@@ -58,12 +58,19 @@ const allProjects = [
 
 function Projects() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useState("All");
 
-  const filteredProjects = allProjects.filter((project) =>
-    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const categories = ["All", "Web App", "Mobile App", "AI/ML", "Design Tool"];
 
+  const filteredProjects = allProjects.filter((project) => {
+    const matchesSearch =
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = category === "All" || project.category === category;
+
+    return matchesSearch && matchesCategory;
+  });
   return (
     <div>
       <Navbar />
@@ -81,23 +88,49 @@ function Projects() {
           Find a project that matches your skills and start collaborating.
         </p>
 
-        <input
-          type="text"
-          placeholder="Search projects by title or description..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+        <div
           style={{
-            width: "100%",
-            maxWidth: "400px",
-            height: "44px",
-            padding: "12px 16px",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-sm)",
-            fontSize: "var(--font-size-base)",
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
             marginBottom: "32px",
-            display: "block",
           }}
-        />
+        >
+          <input
+            type="text"
+            placeholder="Search projects by title or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              flex: 1,
+              minWidth: "220px",
+              height: "44px",
+              padding: "12px 16px",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-sm)",
+              fontSize: "var(--font-size-base)",
+            }}
+          />
+
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            style={{
+              height: "44px",
+              padding: "0 16px",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-sm)",
+              fontSize: "var(--font-size-base)",
+              background: "var(--color-background)",
+            }}
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
         <div
           style={{
             display: "grid",
