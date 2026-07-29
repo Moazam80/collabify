@@ -17,6 +17,10 @@ const allProjects = [
       { name: "Ayesha K.", role: "Project Owner" },
       { name: "Hamza T.", role: "Python Developer" },
     ],
+    joinRequests: [
+      { name: "Sara M.", message: "I'd love to help with the UI/UX design!" },
+      { name: "Zainab A.", message: "I have React experience and would like to join." },
+    ],
   },
   {
     title: "Campus Event Finder",
@@ -79,13 +83,32 @@ const allProjects = [
 function ProjectDetails() {
   const { title } = useParams();
   const navigate = useNavigate();
+  const project = allProjects.find((p) => p.title === decodeURIComponent(title));
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
-  const project = allProjects.find((p) => p.title === decodeURIComponent(title));
+  const [teamMembers, setTeamMembers] = useState(project ? project.teamMembers : []);
+  const [joinRequests, setJoinRequests] = useState(project?.joinRequests || []);
 
   // MVP mock check: assume logged-in user is "Ayesha K." (real auth comes in Phase 15)
   const currentUser = "Ayesha K.";
   const isOwner = project && project.owner === currentUser;
+
+  function handleAcceptRequest(request) {
+    setTeamMembers([...teamMembers, { name: request.name, role: "Team Member" }]);
+    setJoinRequests(joinRequests.filter((r) => r.name !== request.name));
+    console.log("Accepted:", request.name);
+  }
+
+  function handleRejectRequest(request) {
+    setJoinRequests(joinRequests.filter((r) => r.name !== request.name));
+    console.log("Rejected:", request.name);
+  }
+
+  function handleRemoveMember(memberName) {
+    setTeamMembers(teamMembers.filter((m) => m.name !== memberName));
+    console.log("Removed:", memberName);
+  }
 
   function handleDelete() {
     console.log("Project deleted:", project.title);
@@ -212,46 +235,130 @@ function ProjectDetails() {
               Team Members
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {project.teamMembers.map((member) => (
+              {teamMembers.map((member) => (
                 <div
                   key={member.name}
                   style={{
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "space-between",
                     gap: "10px",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "var(--color-primary-light)",
-                      color: "var(--color-primary)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "var(--font-size-caption)",
-                      fontWeight: "700",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {member.name.charAt(0)}
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        background: "var(--color-primary-light)",
+                        color: "var(--color-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "var(--font-size-caption)",
+                        fontWeight: "700",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>
+                        {member.name}
+                      </p>
+                      <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
+                        {member.role}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>
-                      {member.name}
-                    </p>
-                    <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
-                      {member.role}
-                    </p>
-                  </div>
+
+                  {isOwner && member.role !== "Project Owner" && (
+                    <button
+                      onClick={() => handleRemoveMember(member.name)}
+                      style={{
+                        fontSize: "var(--font-size-caption)",
+                        color: "var(--color-danger)",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Join Button */}
+          {/* Join Requests — visible only to owner */}
+          {isOwner && joinRequests.length > 0 && (
+            <div
+              style={{
+                marginBottom: "24px",
+                paddingBottom: "24px",
+                borderBottom: "1px solid var(--color-border)",
+              }}
+            >
+              <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "10px" }}>
+                Pending Join Requests
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {joinRequests.map((request) => (
+                  <div
+                    key={request.name}
+                    style={{
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-sm)",
+                      padding: "12px",
+                    }}
+                  >
+                    <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "4px" }}>
+                      {request.name}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "var(--font-size-caption)",
+                        color: "var(--color-text-secondary)",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {request.message}
+                    </p>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        onClick={() => handleAcceptRequest(request)}
+                        style={{
+                          background: "var(--color-success)",
+                          color: "#fff",
+                          padding: "6px 14px",
+                          borderRadius: "var(--radius-sm)",
+                          fontSize: "var(--font-size-caption)",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleRejectRequest(request)}
+                        style={{
+                          background: "transparent",
+                          border: "1px solid var(--color-danger)",
+                          color: "var(--color-danger)",
+                          padding: "6px 14px",
+                          borderRadius: "var(--radius-sm)",
+                          fontSize: "var(--font-size-caption)",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {isOwner ? (
             <div style={{ display: "flex", gap: "12px" }}>
               <Link
