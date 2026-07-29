@@ -8,6 +8,7 @@ const dummyUser = {
   linkedinUrl: "https://linkedin.com/in/ayeshak",
   projectsCompleted: 4,
   projectsInProgress: 2,
+  skills: ["React", "JavaScript", "UI/UX Design", "Figma", "CSS", "Node.js"],
 };
 
 function Profile() {
@@ -78,6 +79,37 @@ function Profile() {
                 In Progress
               </div>
             </div>
+          </div>
+    </div>
+
+        {/* Skills Section */}
+        <div
+          style={{
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-md)",
+            padding: "24px",
+            marginTop: "24px",
+          }}
+        >
+          <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
+            Skills
+          </h3>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {dummyUser.skills.map((skill) => (
+              <span
+                key={skill}
+                style={{
+                  background: "var(--color-primary-light)",
+                  color: "var(--color-primary)",
+                  padding: "6px 14px",
+                  borderRadius: "999px",
+                  fontSize: "var(--font-size-small)",
+                  fontWeight: "600",
+                }}
+              >
+                {skill}
+              </span>
+            ))}
           </div>
         </div>
       </div>
