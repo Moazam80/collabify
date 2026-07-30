@@ -14,6 +14,7 @@ import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
 import MyProjects from "./pages/MyProjects";
 import JoinedProjects from "./pages/JoinedProjects";
+import JoinRequests from "./pages/JoinRequests";
 import DashboardLayout from "./layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +41,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="my-projects" element={<MyProjects />} />
           <Route path="joined" element={<JoinedProjects />} />
+          <Route path="requests" element={<JoinRequests />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
