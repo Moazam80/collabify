@@ -13,6 +13,7 @@ import EditProject from "./pages/EditProject";
 import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
 import MyProjects from "./pages/MyProjects";
+import JoinedProjects from "./pages/JoinedProjects";
 import DashboardLayout from "./layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="my-projects" element={<MyProjects />} />
+          <Route path="joined" element={<JoinedProjects />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
