@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../services/api";
 import Navbar from "../components/Navbar";
 
 function Register() {
@@ -16,7 +17,7 @@ function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
@@ -26,11 +27,20 @@ function Register() {
     }
 
     setLoading(true);
-    console.log("Register attempt:", formData);
 
-    setTimeout(() => {
+    try {
+      const response = await api.post("/auth/register", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      console.log("Registered:", response.data);
       setLoading(false);
-    }, 1000);
+      // Real redirect to login/dashboard will be refined in Step 14.3
+    } catch (err) {
+      setLoading(false);
+      setError(err.response?.data?.message || "Something went wrong. Please try again.");
+    }
   }
 
   const inputStyle = {

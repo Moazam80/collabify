@@ -17,6 +17,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/test", testRoutes);
+app.use("/api/test", testRoutes);
+
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
 
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
