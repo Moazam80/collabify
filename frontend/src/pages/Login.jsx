@@ -1,20 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    console.log("Login attempt:", { email, password });
 
-    setTimeout(() => {
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      login(response.data.user, response.data.token);
       setLoading(false);
-    }, 1000);
+      navigate("/dashboard");
+    } catch (err) {
+      setLoading(false);
+      alert(err.response?.data?.message || "Login failed. Please try again.");
+    }
   }
 
   return (
