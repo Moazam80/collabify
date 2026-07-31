@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 function ProjectCard({ project }) {
   return (
     <Link
-      to={`/projects/${encodeURIComponent(project.title)}`}
+      to={`/projects/${project._id}`}
       style={{
         background: "var(--color-background)",
         border: "1px solid var(--color-border)",
@@ -55,15 +55,8 @@ function ProjectCard({ project }) {
       </p>
 
       {/* Skills */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
-          marginBottom: "16px",
-        }}
-      >
-        {project.skills.map((skill) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+        {(project.skillsRequired || []).map((skill) => (
           <span
             key={skill}
             style={{
@@ -88,9 +81,9 @@ function ProjectCard({ project }) {
           color: "var(--color-text-secondary)",
         }}
       >
-        <span>👤 {project.owner}</span>
+        <span>👤 {project.owner?.name}</span>
         <span>
-          👥 {project.teamCount}/{project.maxTeamSize}
+          👥 {project.maxTeamSize} max
         </span>
       </div>
     </Link>

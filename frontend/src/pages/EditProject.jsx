@@ -1,59 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-
-// Same dummy data — Phase 14 mein ye ek shared database se aayega
-const allProjects = [
-  {
-    title: "AI Recipe Generator",
-    category: "AI/ML",
-    description: "An app that suggests recipes based on ingredients you have at home.",
-    skills: ["Python", "React", "UI/UX"],
-    maxTeamSize: 5,
-  },
-  {
-    title: "Campus Event Finder",
-    category: "Web App",
-    description: "A platform for students to discover and RSVP to campus events.",
-    skills: ["React", "Node.js"],
-    maxTeamSize: 4,
-  },
-  {
-    title: "Freelance Portfolio Builder",
-    category: "Design Tool",
-    description: "A drag-and-drop tool for freelancers to build portfolio websites.",
-    skills: ["UI/UX", "React", "Figma"],
-    maxTeamSize: 3,
-  },
-  {
-    title: "Expense Tracker App",
-    category: "Mobile App",
-    description: "A simple mobile app to track daily expenses and set budgets.",
-    skills: ["React Native", "Node.js"],
-    maxTeamSize: 4,
-  },
-  {
-    title: "Local Business Directory",
-    category: "Web App",
-    description: "A directory site to help people discover local small businesses.",
-    skills: ["React", "MongoDB"],
-    maxTeamSize: 4,
-  },
-];
+import api from "../services/api";
 
 function EditProject() {
-  const { title } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const existingProject = allProjects.find((p) => p.title === decodeURIComponent(title));
 
-  const [formData, setFormData] = useState(
-    existingProject || { title: "", description: "", category: "Web App", maxTeamSize: 5 }
-  );
-  const [skills, setSkills] = useState(existingProject ? existingProject.skills : []);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "Web App",
+    maxTeamSize: 5,
+  });
+  const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   const categories = ["Web App", "Mobile App", "AI/ML", "Design Tool"];
+
+  useEffect(() => {
+    async function fetchProject() {
+      try {
+        const response = await api.get(`/projects/${id}`);
+        const project = response.data.project;
+        setFormData({
+          title: project.title,
+          description: project.description,
+          category: project.category,
+          maxTeamSize: project.maxTeamSize,
+        });
+        setSkills(project.skillsRequired || []);
+      } catch (error) {
+        setNotFound(true);
+      } finally {
+        setFetching(false);
+      }
+    }
+    fetchProject();
+  }, [id]);
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -72,16 +59,18 @@ function EditProject() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    console.log("Project updated:", { ...formData, skills });
 
-    // Real update API call will be connected in Phase 14
-    setTimeout(() => {
+    try {
+      await api.put(`/projects/${id}`, { ...formData, skillsRequired: skills });
       setLoading(false);
-      navigate(`/projects/${encodeURIComponent(formData.title)}`);
-    }, 1000);
+      navigate(`/projects/${id}`);
+    } catch (error) {
+      setLoading(false);
+      console.error("Failed to update project:", error);
+    }
   }
 
   const inputStyle = {
@@ -100,7 +89,16 @@ function EditProject() {
     marginBottom: "6px",
   };
 
-  if (!existingProject) {
+  if (fetching) {
+    return (
+      <div>
+        <Navbar />
+        <div style={{ textAlign: "center", padding: "80px" }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (notFound) {
     return (
       <div>
         <Navbar />
@@ -125,46 +123,23 @@ function EditProject() {
             padding: "32px",
           }}
         >
-          <h2 style={{ fontSize: "var(--font-size-h3)", marginBottom: "24px" }}>
-            Edit Project
-          </h2>
+          <h2 style={{ fontSize: "var(--font-size-h3)", marginBottom: "24px" }}>Edit Project</h2>
 
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Project Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            />
+            <input type="text" name="title" value={formData.title} onChange={handleChange} required style={inputStyle} />
           </div>
 
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={4}
-              style={{ ...inputStyle, resize: "vertical" }}
-            />
+            <textarea name="description" value={formData.description} onChange={handleChange} required rows={4} style={{ ...inputStyle, resize: "vertical" }} />
           </div>
 
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Category</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              style={{ ...inputStyle, background: "var(--color-background)" }}
-            >
+            <select name="category" value={formData.category} onChange={handleChange} style={{ ...inputStyle, background: "var(--color-background)" }}>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
@@ -176,23 +151,14 @@ function EditProject() {
                 type="text"
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddSkill(e);
-                }}
+                onKeyDown={(e) => { if (e.key === "Enter") handleAddSkill(e); }}
                 style={inputStyle}
                 placeholder="e.g. React"
               />
               <button
                 type="button"
                 onClick={handleAddSkill}
-                style={{
-                  background: "var(--color-primary)",
-                  color: "#fff",
-                  padding: "0 20px",
-                  borderRadius: "var(--radius-sm)",
-                  fontWeight: "600",
-                  whiteSpace: "nowrap",
-                }}
+                style={{ background: "var(--color-primary)", color: "#fff", padding: "0 20px", borderRadius: "var(--radius-sm)", fontWeight: "600", whiteSpace: "nowrap" }}
               >
                 Add
               </button>
@@ -213,11 +179,7 @@ function EditProject() {
                   }}
                 >
                   {skill}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSkill(skill)}
-                    style={{ color: "var(--color-primary)", fontWeight: "700" }}
-                  >
+                  <button type="button" onClick={() => handleRemoveSkill(skill)} style={{ color: "var(--color-primary)", fontWeight: "700" }}>
                     ×
                   </button>
                 </span>
@@ -227,16 +189,9 @@ function EditProject() {
 
           <div style={{ marginBottom: "24px" }}>
             <label style={labelStyle}>Max Team Size</label>
-            <select
-              name="maxTeamSize"
-              value={formData.maxTeamSize}
-              onChange={handleChange}
-              style={{ ...inputStyle, background: "var(--color-background)" }}
-            >
+            <select name="maxTeamSize" value={formData.maxTeamSize} onChange={handleChange} style={{ ...inputStyle, background: "var(--color-background)" }}>
               {[2, 3, 4, 5].map((num) => (
-                <option key={num} value={num}>
-                  {num} members
-                </option>
+                <option key={num} value={num}>{num} members</option>
               ))}
             </select>
           </div>
@@ -253,7 +208,6 @@ function EditProject() {
               fontWeight: "600",
               fontSize: "var(--font-size-base)",
               opacity: loading ? 0.6 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
             {loading ? "Saving..." : "Save Changes"}

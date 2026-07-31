@@ -34,8 +34,8 @@ function App() {
         <Route path="/profile/edit" element={<EditProfile />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/create" element={<CreateProject />} />
-        <Route path="/projects/:title/edit" element={<EditProject />} />
-        <Route path="/projects/:title" element={<ProjectDetails />} />
+        <Route path="/projects/:id/edit" element={<EditProject />} />
+        <Route path="/projects/:id" element={<ProjectDetails />} />
         <Route path="/feed" element={<Feed />} />
 
         {/* Dashboard routes — all share the Sidebar layout */}

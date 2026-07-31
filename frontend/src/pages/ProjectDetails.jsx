@@ -1,120 +1,52 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-
-// Same dummy data as Projects.jsx — in Phase 14 this comes from one shared API/database
-const allProjects = [
-  {
-    title: "AI Recipe Generator",
-    category: "AI/ML",
-    status: "Active",
-    description: "An app that suggests recipes based on ingredients you have at home.",
-    skills: ["Python", "React", "UI/UX"],
-    owner: "Ayesha K.",
-    teamCount: 2,
-    maxTeamSize: 5,
-    teamMembers: [
-      { name: "Ayesha K.", role: "Project Owner" },
-      { name: "Hamza T.", role: "Python Developer" },
-    ],
-    joinRequests: [
-      { name: "Sara M.", message: "I'd love to help with the UI/UX design!" },
-      { name: "Zainab A.", message: "I have React experience and would like to join." },
-    ],
-  },
-  {
-    title: "Campus Event Finder",
-    category: "Web App",
-    status: "Active",
-    description: "A platform for students to discover and RSVP to campus events.",
-    skills: ["React", "Node.js"],
-    owner: "Bilal R.",
-    teamCount: 3,
-    maxTeamSize: 4,
-    teamMembers: [
-      { name: "Bilal R.", role: "Project Owner" },
-      { name: "Sara M.", role: "Frontend Developer" },
-      { name: "Zainab A.", role: "Backend Developer" },
-    ],
-  },
-  {
-    title: "Freelance Portfolio Builder",
-    category: "Design Tool",
-    status: "Active",
-    description: "A drag-and-drop tool for freelancers to build portfolio websites.",
-    skills: ["UI/UX", "React", "Figma"],
-    owner: "Sara M.",
-    teamCount: 1,
-    maxTeamSize: 3,
-    teamMembers: [{ name: "Sara M.", role: "Project Owner" }],
-  },
-  {
-    title: "Expense Tracker App",
-    category: "Mobile App",
-    status: "Active",
-    description: "A simple mobile app to track daily expenses and set budgets.",
-    skills: ["React Native", "Node.js"],
-    owner: "Hamza T.",
-    teamCount: 2,
-    maxTeamSize: 4,
-    teamMembers: [
-      { name: "Hamza T.", role: "Project Owner" },
-      { name: "Ayesha K.", role: "UI Designer" },
-    ],
-  },
-  {
-    title: "Local Business Directory",
-    category: "Web App",
-    status: "Completed",
-    description: "A directory site to help people discover local small businesses.",
-    skills: ["React", "MongoDB"],
-    owner: "Zainab A.",
-    teamCount: 4,
-    maxTeamSize: 4,
-    teamMembers: [
-      { name: "Zainab A.", role: "Project Owner" },
-      { name: "Bilal R.", role: "Backend Developer" },
-      { name: "Sara M.", role: "Frontend Developer" },
-      { name: "Hamza T.", role: "QA Tester" },
-    ],
-  },
-];
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function ProjectDetails() {
-  const { title } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const project = allProjects.find((p) => p.title === decodeURIComponent(title));
-
+  const { user } = useAuth();
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
-  const [teamMembers, setTeamMembers] = useState(project ? project.teamMembers : []);
-  const [joinRequests, setJoinRequests] = useState(project?.joinRequests || []);
 
-  // MVP mock check: assume logged-in user is "Ayesha K." (real auth comes in Phase 15)
-  const currentUser = "Ayesha K.";
-  const isOwner = project && project.owner === currentUser;
+  useEffect(() => {
+    async function fetchProject() {
+      try {
+        const response = await api.get(`/projects/${id}`);
+        setProject(response.data.project);
+      } catch (error) {
+        console.error("Failed to load project:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProject();
+  }, [id]);
 
-  function handleAcceptRequest(request) {
-    setTeamMembers([...teamMembers, { name: request.name, role: "Team Member" }]);
-    setJoinRequests(joinRequests.filter((r) => r.name !== request.name));
-    console.log("Accepted:", request.name);
+  const isOwner = user && project && project.owner._id === user.id;
+
+  async function handleDelete() {
+    try {
+      await api.delete(`/projects/${id}`);
+      navigate("/projects");
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+    }
   }
 
-  function handleRejectRequest(request) {
-    setJoinRequests(joinRequests.filter((r) => r.name !== request.name));
-    console.log("Rejected:", request.name);
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <div style={{ textAlign: "center", padding: "80px" }}>Loading project...</div>
+      </div>
+    );
   }
 
-  function handleRemoveMember(memberName) {
-    setTeamMembers(teamMembers.filter((m) => m.name !== memberName));
-    console.log("Removed:", memberName);
-  }
-
-  function handleDelete() {
-    console.log("Project deleted:", project.title);
-    // Real delete API call will be connected in Phase 14
-    navigate("/projects");
-  }
   if (!project) {
     return (
       <div>
@@ -135,24 +67,12 @@ function ProjectDetails() {
       <div style={{ maxWidth: "700px", margin: "0 auto", padding: "40px 24px" }}>
         <Link
           to="/projects"
-          style={{
-            fontSize: "var(--font-size-small)",
-            color: "var(--color-text-secondary)",
-            marginBottom: "16px",
-            display: "inline-block",
-          }}
+          style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)", marginBottom: "16px", display: "inline-block" }}
         >
           ← Back to Projects
         </Link>
 
-        <div
-          style={{
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            padding: "32px",
-          }}
-        >
-          {/* Category + Status */}
+        <div style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "32px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
             <span
               style={{
@@ -170,29 +90,20 @@ function ProjectDetails() {
             </span>
           </div>
 
-          {/* Title */}
           <h1 style={{ fontSize: "var(--font-size-h2)", fontWeight: "700", marginBottom: "12px" }}>
             {project.title}
           </h1>
 
-          {/* Description */}
-          <p
-            style={{
-              fontSize: "var(--font-size-base)",
-              color: "var(--color-text-secondary)",
-              marginBottom: "24px",
-            }}
-          >
+          <p style={{ fontSize: "var(--font-size-base)", color: "var(--color-text-secondary)", marginBottom: "24px" }}>
             {project.description}
           </p>
 
-          {/* Skills */}
           <div style={{ marginBottom: "24px" }}>
             <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "10px" }}>
               Skills Needed
             </h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {project.skills.map((skill) => (
+              {project.skillsRequired.map((skill) => (
                 <span
                   key={skill}
                   style={{
@@ -209,7 +120,6 @@ function ProjectDetails() {
             </div>
           </div>
 
-          {/* Owner + Team */}
           <div
             style={{
               display: "flex",
@@ -217,152 +127,18 @@ function ProjectDetails() {
               fontSize: "var(--font-size-small)",
               color: "var(--color-text-secondary)",
               marginBottom: "24px",
-            }}
-          >
-            <span>👤 Created by {project.owner}</span>
-            <span>👥 {project.teamCount}/{project.maxTeamSize} members</span>
-          </div>
-
-          {/* Team Members List */}
-          <div
-            style={{
-              marginBottom: "24px",
               paddingBottom: "24px",
               borderBottom: "1px solid var(--color-border)",
             }}
           >
-            <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "10px" }}>
-              Team Members
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {teamMembers.map((member) => (
-                <div
-                  key={member.name}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "10px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        background: "var(--color-primary-light)",
-                        color: "var(--color-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "var(--font-size-caption)",
-                        fontWeight: "700",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {member.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>
-                        {member.name}
-                      </p>
-                      <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
-                        {member.role}
-                      </p>
-                    </div>
-                  </div>
-
-                  {isOwner && member.role !== "Project Owner" && (
-                    <button
-                      onClick={() => handleRemoveMember(member.name)}
-                      style={{
-                        fontSize: "var(--font-size-caption)",
-                        color: "var(--color-danger)",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+            <span>👤 Created by {project.owner.name}</span>
+            <span>👥 Max {project.maxTeamSize} members</span>
           </div>
-
-          {/* Join Requests — visible only to owner */}
-          {isOwner && joinRequests.length > 0 && (
-            <div
-              style={{
-                marginBottom: "24px",
-                paddingBottom: "24px",
-                borderBottom: "1px solid var(--color-border)",
-              }}
-            >
-              <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "10px" }}>
-                Pending Join Requests
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {joinRequests.map((request) => (
-                  <div
-                    key={request.name}
-                    style={{
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius-sm)",
-                      padding: "12px",
-                    }}
-                  >
-                    <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "4px" }}>
-                      {request.name}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "var(--font-size-caption)",
-                        color: "var(--color-text-secondary)",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      {request.message}
-                    </p>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        onClick={() => handleAcceptRequest(request)}
-                        style={{
-                          background: "var(--color-success)",
-                          color: "#fff",
-                          padding: "6px 14px",
-                          borderRadius: "var(--radius-sm)",
-                          fontSize: "var(--font-size-caption)",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleRejectRequest(request)}
-                        style={{
-                          background: "transparent",
-                          border: "1px solid var(--color-danger)",
-                          color: "var(--color-danger)",
-                          padding: "6px 14px",
-                          borderRadius: "var(--radius-sm)",
-                          fontSize: "var(--font-size-caption)",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {isOwner ? (
             <div style={{ display: "flex", gap: "12px" }}>
               <Link
-                to={`/projects/${encodeURIComponent(project.title)}/edit`}
+                to={`/projects/${project._id}/edit`}
                 style={{
                   flex: 1,
                   textAlign: "center",
@@ -405,16 +181,12 @@ function ProjectDetails() {
                 fontSize: "var(--font-size-base)",
                 cursor: requestSent ? "default" : "pointer",
               }}
-              onClick={() => {
-                console.log("Join request sent for:", project.title);
-                setRequestSent(true);
-              }}
+              onClick={() => setRequestSent(true)}
             >
               {requestSent ? "✓ Request Sent" : "Request to Join"}
             </button>
           )}
 
-          {/* Delete Confirmation */}
           {showDeleteConfirm && (
             <div
               style={{

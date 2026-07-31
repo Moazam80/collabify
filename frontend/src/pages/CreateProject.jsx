@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import api from "../services/api";
 
 function CreateProject() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ function CreateProject() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
@@ -45,14 +46,21 @@ function CreateProject() {
     }
 
     setLoading(true);
-    const newProject = { ...formData, skills };
-    console.log("New project created:", newProject);
 
-    // Real save logic (API call) will be connected in Phase 14
-    setTimeout(() => {
+    try {
+      await api.post("/projects", {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        skillsRequired: skills,
+        maxTeamSize: formData.maxTeamSize,
+      });
       setLoading(false);
       navigate("/projects");
-    }, 1000);
+    } catch (err) {
+      setLoading(false);
+      setError(err.response?.data?.message || "Failed to create project.");
+    }
   }
 
   const inputStyle = {
