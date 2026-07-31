@@ -33,6 +33,9 @@ app.use("/api", teamRoutes);
 const postRoutes = require("./routes/postRoutes");
 app.use("/api/posts", postRoutes);
 
+const followRoutes = require("./routes/followRoutes");
+app.use("/api/users", followRoutes);
+
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 

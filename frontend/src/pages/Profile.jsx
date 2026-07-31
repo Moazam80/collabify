@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const dummyUserProjects = [
   {
@@ -9,23 +10,29 @@ const dummyUserProjects = [
     category: "Design Tool",
     status: "Completed",
     description: "A drag-and-drop tool for freelancers to build portfolio websites.",
-    skills: ["React", "Figma"],
-    owner: "Ayesha Khan",
-    teamCount: 3,
+    skillsRequired: ["React", "Figma"],
+    owner: { name: "You" },
     maxTeamSize: 3,
   },
 ];
 
 function Profile() {
+  const { user: currentUser } = useAuth();
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
 
   useEffect(() => {
     async function fetchProfile() {
       try {
         const response = await api.get("/users/me");
-        setProfileUser(response.data.user);
+        const fetchedUser = response.data.user;
+        setProfileUser(fetchedUser);
+
+        const statusRes = await api.get(`/users/${fetchedUser._id}/follow-status`);
+        setFollowerCount(statusRes.data.followerCount);
+        setIsFollowing(statusRes.data.isFollowing);
       } catch (error) {
         console.error("Failed to load profile:", error);
       } finally {
@@ -35,8 +42,19 @@ function Profile() {
     fetchProfile();
   }, []);
 
-  function handleFollowToggle() {
-    setIsFollowing(!isFollowing);
+  async function handleFollowToggle() {
+    try {
+      if (isFollowing) {
+        await api.delete(`/users/${profileUser._id}/follow`);
+        setFollowerCount(followerCount - 1);
+      } else {
+        await api.post(`/users/${profileUser._id}/follow`);
+        setFollowerCount(followerCount + 1);
+      }
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.error("Failed to toggle follow:", error);
+    }
   }
 
   if (loading) {
@@ -52,12 +70,12 @@ function Profile() {
     return (
       <div>
         <Navbar />
-        <div style={{ textAlign: "center", padding: "80px" }}>
-          Please log in to view your profile.
-        </div>
+        <div style={{ textAlign: "center", padding: "80px" }}>Please log in to view your profile.</div>
       </div>
     );
   }
+
+  const isOwnProfile = currentUser && profileUser._id === currentUser.id;
 
   return (
     <div>
@@ -112,26 +130,32 @@ function Profile() {
               )}
             </div>
           </div>
+
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "var(--font-size-h3)", fontWeight: "700" }}>{followerCount}</div>
+            <div style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>Followers</div>
+          </div>
         </div>
 
-        <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
-          <button
-            onClick={handleFollowToggle}
-            style={{
-              background: isFollowing ? "transparent" : "var(--color-primary)",
-              border: isFollowing ? "1px solid var(--color-border)" : "none",
-              color: isFollowing ? "var(--color-text-primary)" : "#fff",
-              padding: "10px 24px",
-              borderRadius: "var(--radius-sm)",
-              fontWeight: "600",
-              fontSize: "var(--font-size-small)",
-            }}
-          >
-            {isFollowing ? "✓ Following" : "+ Follow"}
-          </button>
-        </div>
+        {!isOwnProfile && (
+          <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={handleFollowToggle}
+              style={{
+                background: isFollowing ? "transparent" : "var(--color-primary)",
+                border: isFollowing ? "1px solid var(--color-border)" : "none",
+                color: isFollowing ? "var(--color-text-primary)" : "#fff",
+                padding: "10px 24px",
+                borderRadius: "var(--radius-sm)",
+                fontWeight: "600",
+                fontSize: "var(--font-size-small)",
+              }}
+            >
+              {isFollowing ? "✓ Following" : "+ Follow"}
+            </button>
+          </div>
+        )}
 
-        {/* Skills Section */}
         <div style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "24px", marginTop: "24px" }}>
           <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>Skills</h3>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
@@ -159,7 +183,6 @@ function Profile() {
           </div>
         </div>
 
-        {/* Project Portfolio Section */}
         <div style={{ marginTop: "24px" }}>
           <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
             Project Portfolio
