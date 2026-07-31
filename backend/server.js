@@ -27,6 +27,9 @@ app.use("/api/users", userRoutes);
 const projectRoutes = require("./routes/projectRoutes");
 app.use("/api/projects", projectRoutes);
 
+const teamRoutes = require("./routes/teamRoutes");
+app.use("/api", teamRoutes);
+
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 
