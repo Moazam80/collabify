@@ -1,88 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import PostCard from "../components/PostCard";
-
-const initialPosts = [
-  {
-    id: 1,
-    author: "Bilal R.",
-    timeAgo: "2 hours ago",
-    content: "Just shipped the first version of Campus Event Finder! Looking for a designer to help polish the UI. 🎉",
-    likes: 12,
-    liked: false,
-    commentsList: [
-      { id: 1, author: "Sara M.", text: "Congrats! This looks great." },
-      { id: 2, author: "Zainab A.", text: "I'd love to help with the design!" },
-    ],
-  },
-  {
-    id: 2,
-    author: "Sara M.",
-    timeAgo: "5 hours ago",
-    content: "Wrapped up the Freelance Portfolio Builder project this week. Huge thanks to everyone who joined the team!",
-    likes: 24,
-    liked: false,
-    commentsList: [
-      { id: 1, author: "Ayesha K.", text: "Amazing work team!" },
-    ],
-  },
-  {
-    id: 3,
-    author: "Hamza T.",
-    timeAgo: "1 day ago",
-    content: "Looking for a React Native developer to join the Expense Tracker App. DM me if interested!",
-    likes: 8,
-    liked: false,
-    commentsList: [],
-  },
-];
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function Feed() {
-  const [posts, setPosts] = useState(initialPosts);
+  const { user } = useAuth();
+  const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [posting, setPosting] = useState(false);
 
-  function handleLike(id) {
-    setPosts(
-      posts.map((post) =>
-        post.id === id
-          ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
-          : post
-      )
-    );
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  async function fetchPosts() {
+    try {
+      const response = await api.get("/posts");
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.error("Failed to load posts:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handlePostSubmit(e) {
+  async function handleLike(postId) {
+    try {
+      await api.post(`/posts/${postId}/like`);
+      fetchPosts();
+    } catch (error) {
+      console.error("Failed to like post:", error);
+    }
+  }
+
+  async function handleAddComment(postId, commentText) {
+    try {
+      await api.post(`/posts/${postId}/comments`, { text: commentText });
+      fetchPosts();
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+    }
+  }
+
+  async function handlePostSubmit(e) {
     e.preventDefault();
     if (!newPost.trim()) return;
 
-    const newPostObject = {
-      id: Date.now(),
-      author: "You",
-      timeAgo: "Just now",
-      content: newPost,
-      likes: 0,
-      liked: false,
-      commentsList: [],
-    };
-
-    setPosts([newPostObject, ...posts]);
-    setNewPost("");
-  }
-
-  function handleAddComment(postId, commentText) {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              commentsList: [
-                ...post.commentsList,
-                { id: Date.now(), author: "You", text: commentText },
-              ],
-            }
-          : post
-      )
-    );
+    setPosting(true);
+    try {
+      await api.post("/posts", { content: newPost });
+      setNewPost("");
+      fetchPosts();
+    } catch (error) {
+      console.error("Failed to create post:", error);
+    } finally {
+      setPosting(false);
+    }
   }
 
   return (
@@ -93,54 +68,70 @@ function Feed() {
           Feed
         </h1>
 
-        {/* Create Post Box */}
-        <form
-          onSubmit={handlePostSubmit}
-          style={{
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            padding: "16px",
-            marginBottom: "24px",
-          }}
-        >
-          <textarea
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            placeholder="Share an update with the community..."
-            rows={3}
+        {user && (
+          <form
+            onSubmit={handlePostSubmit}
             style={{
-              width: "100%",
               border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              padding: "12px",
-              fontSize: "var(--font-size-base)",
-              fontFamily: "inherit",
-              resize: "vertical",
-              marginBottom: "12px",
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              background: "var(--color-primary)",
-              color: "#fff",
-              padding: "10px 24px",
-              borderRadius: "var(--radius-sm)",
-              fontWeight: "600",
-              fontSize: "var(--font-size-small)",
+              borderRadius: "var(--radius-md)",
+              padding: "16px",
+              marginBottom: "24px",
             }}
           >
-            Post
-          </button>
-        </form>
+            <textarea
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              placeholder="Share an update with the community..."
+              rows={3}
+              style={{
+                width: "100%",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-sm)",
+                padding: "12px",
+                fontSize: "var(--font-size-base)",
+                fontFamily: "inherit",
+                resize: "vertical",
+                marginBottom: "12px",
+              }}
+            />
+            <button
+              type="submit"
+              disabled={posting}
+              style={{
+                background: "var(--color-primary)",
+                color: "#fff",
+                padding: "10px 24px",
+                borderRadius: "var(--radius-sm)",
+                fontWeight: "600",
+                fontSize: "var(--font-size-small)",
+                opacity: posting ? 0.6 : 1,
+              }}
+            >
+              {posting ? "Posting..." : "Post"}
+            </button>
+          </form>
+        )}
 
-        {/* Posts List */}
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={{ ...post, onLike: handleLike, onAddComment: handleAddComment }}
-          />
-        ))}
+        {loading ? (
+          <p style={{ textAlign: "center", color: "var(--color-text-secondary)" }}>Loading feed...</p>
+        ) : posts.length === 0 ? (
+          <p style={{ textAlign: "center", color: "var(--color-text-secondary)" }}>
+            No posts yet. Be the first to share an update!
+          </p>
+        ) : (
+          posts.map((post) => (
+            <PostCard
+              key={post._id}
+              post={{
+                ...post,
+                author: post.author.name,
+                liked: user ? post.likes.includes(user.id) : false,
+                onLike: handleLike,
+                onAddComment: handleAddComment,
+              }}
+            />
+          ))
+        )}
       </div>
     </div>
   );

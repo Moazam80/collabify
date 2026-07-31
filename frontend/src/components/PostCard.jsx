@@ -1,4 +1,16 @@
 import { useState } from "react";
+
+function timeAgo(dateString) {
+  const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 function PostCard({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -6,9 +18,10 @@ function PostCard({ post }) {
   function handleCommentSubmit(e) {
     e.preventDefault();
     if (!commentText.trim()) return;
-    post.onAddComment(post.id, commentText);
+    post.onAddComment(post._id, commentText);
     setCommentText("");
   }
+
   return (
     <div
       style={{
@@ -19,7 +32,6 @@ function PostCard({ post }) {
         marginBottom: "16px",
       }}
     >
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
         <div
           style={{
@@ -41,15 +53,13 @@ function PostCard({ post }) {
         <div>
           <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>{post.author}</p>
           <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
-            {post.timeAgo}
+            {timeAgo(post.createdAt)}
           </p>
         </div>
       </div>
 
-      {/* Content */}
       <p style={{ fontSize: "var(--font-size-base)", marginBottom: "16px" }}>{post.content}</p>
 
-      {/* Footer */}
       <div
         style={{
           display: "flex",
@@ -65,28 +75,20 @@ function PostCard({ post }) {
             color: post.liked ? "var(--color-danger)" : "var(--color-text-secondary)",
             fontWeight: "600",
           }}
-          onClick={() => post.onLike(post.id)}
+          onClick={() => post.onLike(post._id)}
         >
-          {post.liked ? "❤️" : "🤍"} {post.likes} {post.likes === 1 ? "Like" : "Likes"}
-        </button>
-        <button
-          style={{
-            fontSize: "var(--font-size-small)",
-            color: "var(--color-text-secondary)",
-            fontWeight: "600",
-          }}
-          onClick={() => setShowComments(!showComments)}
-        >
-          💬 {post.commentsList.length}{" "}
-          {post.commentsList.length === 1 ? "Comment" : "Comments"}
+          {post.liked ? "❤️" : "🤍"} {post.likes.length} {post.likes.length === 1 ? "Like" : "Likes"}
         </button>
 
         <button
-          style={{
-            fontSize: "var(--font-size-small)",
-            color: "var(--color-text-secondary)",
-            fontWeight: "600",
-          }}
+          style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)", fontWeight: "600" }}
+          onClick={() => setShowComments(!showComments)}
+        >
+          💬 {post.commentsList.length} {post.commentsList.length === 1 ? "Comment" : "Comments"}
+        </button>
+
+        <button
+          style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)", fontWeight: "600" }}
           onClick={() => {
             navigator.clipboard.writeText(`Check out this post by ${post.author} on Collabify!`);
             alert("Post link copied to clipboard!");
@@ -96,13 +98,11 @@ function PostCard({ post }) {
         </button>
       </div>
 
-      {/* Comments Section */}
       {showComments && (
         <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--color-border)" }}>
-          {/* Existing Comments */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "12px" }}>
             {post.commentsList.map((comment) => (
-              <div key={comment.id} style={{ display: "flex", gap: "8px" }}>
+              <div key={comment._id} style={{ display: "flex", gap: "8px" }}>
                 <div
                   style={{
                     width: "28px",
@@ -117,50 +117,27 @@ function PostCard({ post }) {
                     flexShrink: 0,
                   }}
                 >
-                  {comment.author.charAt(0)}
+                  {comment.author.name.charAt(0)}
                 </div>
-                <div
-                  style={{
-                    background: "var(--color-background-alt)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "8px 12px",
-                    flex: 1,
-                  }}
-                >
-                  <p style={{ fontSize: "var(--font-size-caption)", fontWeight: "600" }}>
-                    {comment.author}
-                  </p>
+                <div style={{ background: "var(--color-background-alt)", borderRadius: "var(--radius-sm)", padding: "8px 12px", flex: 1 }}>
+                  <p style={{ fontSize: "var(--font-size-caption)", fontWeight: "600" }}>{comment.author.name}</p>
                   <p style={{ fontSize: "var(--font-size-small)" }}>{comment.text}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Add Comment Form */}
           <form onSubmit={handleCommentSubmit} style={{ display: "flex", gap: "8px" }}>
             <input
               type="text"
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Write a comment..."
-              style={{
-                flex: 1,
-                padding: "8px 12px",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-                fontSize: "var(--font-size-small)",
-              }}
+              style={{ flex: 1, padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", fontSize: "var(--font-size-small)" }}
             />
             <button
               type="submit"
-              style={{
-                background: "var(--color-primary)",
-                color: "#fff",
-                padding: "8px 16px",
-                borderRadius: "var(--radius-sm)",
-                fontSize: "var(--font-size-small)",
-                fontWeight: "600",
-              }}
+              style={{ background: "var(--color-primary)", color: "#fff", padding: "8px 16px", borderRadius: "var(--radius-sm)", fontSize: "var(--font-size-small)", fontWeight: "600" }}
             >
               Send
             </button>
