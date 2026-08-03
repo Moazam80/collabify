@@ -1,40 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-// Dummy data — join requests across all of "Ayesha K."'s owned projects
-// In Phase 14, this will be fetched from the API filtered by project owner
-const initialRequests = [
-  {
-    id: 1,
-    projectTitle: "AI Recipe Generator",
-    name: "Sara M.",
-    message: "I'd love to help with the UI/UX design!",
-  },
-  {
-    id: 2,
-    projectTitle: "AI Recipe Generator",
-    name: "Zainab A.",
-    message: "I have React experience and would like to join.",
-  },
-  {
-    id: 3,
-    projectTitle: "Portfolio Website Builder",
-    name: "Bilal R.",
-    message: "Interested in contributing as a backend developer.",
-  },
-];
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function JoinRequests() {
-  const [requests, setRequests] = useState(initialRequests);
+  const { user } = useAuth();
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  function handleAccept(id) {
-    console.log("Accepted request:", id);
-    setRequests(requests.filter((r) => r.id !== id));
+  useEffect(() => {
+    fetchAllRequests();
+  }, [user]);
+
+  async function fetchAllRequests() {
+    try {
+      const response = await api.get("/projects");
+      const myProjects = response.data.projects.filter((p) => p.owner._id === user.id);
+
+      let allRequests = [];
+      for (const project of myProjects) {
+        const reqRes = await api.get(`/projects/${project._id}/join-requests`);
+        const withProjectInfo = reqRes.data.requests.map((r) => ({
+          ...r,
+          projectTitle: project.title,
+          projectId: project._id,
+        }));
+        allRequests = [...allRequests, ...withProjectInfo];
+      }
+      setRequests(allRequests);
+    } catch (error) {
+      console.error("Failed to load requests:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleReject(id) {
-    console.log("Rejected request:", id);
-    setRequests(requests.filter((r) => r.id !== id));
+  async function handleAccept(requestId) {
+    try {
+      await api.put(`/join-requests/${requestId}/accept`);
+      fetchAllRequests();
+    } catch (error) {
+      console.error("Failed to accept:", error);
+    }
+  }
+
+  async function handleReject(requestId) {
+    try {
+      await api.put(`/join-requests/${requestId}/reject`);
+      fetchAllRequests();
+    } catch (error) {
+      console.error("Failed to reject:", error);
+    }
   }
 
   return (
@@ -43,76 +59,38 @@ function JoinRequests() {
         Join Requests
       </h1>
 
-      {requests.length > 0 ? (
+      {loading ? (
+        <p style={{ textAlign: "center", color: "var(--color-text-secondary)" }}>Loading...</p>
+      ) : requests.length > 0 ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {requests.map((request) => (
-            <div
-              key={request.id}
-              style={{
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-md)",
-                padding: "20px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "8px",
-                }}
-              >
-                <div>
-                  <p style={{ fontSize: "var(--font-size-base)", fontWeight: "600" }}>
-                    {request.name}
-                  </p>
-                  <Link
-                    to={`/projects/${encodeURIComponent(request.projectTitle)}`}
-                    style={{
-                      fontSize: "var(--font-size-caption)",
-                      color: "var(--color-primary)",
-                    }}
-                  >
-                    wants to join {request.projectTitle}
-                  </Link>
-                </div>
+            <div key={request._id} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "20px" }}>
+              <div style={{ marginBottom: "8px" }}>
+                <p style={{ fontSize: "var(--font-size-base)", fontWeight: "600" }}>{request.user.name}</p>
+                <Link
+                  to={`/projects/${request.projectId}`}
+                  style={{ fontSize: "var(--font-size-caption)", color: "var(--color-primary)" }}
+                >
+                  wants to join {request.projectTitle}
+                </Link>
               </div>
 
-              <p
-                style={{
-                  fontSize: "var(--font-size-small)",
-                  color: "var(--color-text-secondary)",
-                  marginBottom: "16px",
-                }}
-              >
-                {request.message}
-              </p>
+              {request.message && (
+                <p style={{ fontSize: "var(--font-size-small)", color: "var(--color-text-secondary)", marginBottom: "16px" }}>
+                  {request.message}
+                </p>
+              )}
 
               <div style={{ display: "flex", gap: "10px" }}>
                 <button
-                  onClick={() => handleAccept(request.id)}
-                  style={{
-                    background: "var(--color-success)",
-                    color: "#fff",
-                    padding: "8px 18px",
-                    borderRadius: "var(--radius-sm)",
-                    fontWeight: "600",
-                    fontSize: "var(--font-size-small)",
-                  }}
+                  onClick={() => handleAccept(request._id)}
+                  style={{ background: "var(--color-success)", color: "#fff", padding: "8px 18px", borderRadius: "var(--radius-sm)", fontWeight: "600", fontSize: "var(--font-size-small)" }}
                 >
                   Accept
                 </button>
                 <button
-                  onClick={() => handleReject(request.id)}
-                  style={{
-                    background: "transparent",
-                    border: "1px solid var(--color-danger)",
-                    color: "var(--color-danger)",
-                    padding: "8px 18px",
-                    borderRadius: "var(--radius-sm)",
-                    fontWeight: "600",
-                    fontSize: "var(--font-size-small)",
-                  }}
+                  onClick={() => handleReject(request._id)}
+                  style={{ background: "transparent", border: "1px solid var(--color-danger)", color: "var(--color-danger)", padding: "8px 18px", borderRadius: "var(--radius-sm)", fontWeight: "600", fontSize: "var(--font-size-small)" }}
                 >
                   Reject
                 </button>

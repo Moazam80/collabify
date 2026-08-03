@@ -1,42 +1,32 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
-
-// Dummy data — projects owned by the current logged-in user ("Ayesha K.")
-// In Phase 14, this will be fetched from the API filtered by owner
-const myProjects = [
-  {
-    title: "AI Recipe Generator",
-    category: "AI/ML",
-    status: "Active",
-    description: "An app that suggests recipes based on ingredients you have at home.",
-    skills: ["Python", "React", "UI/UX"],
-    owner: "Ayesha K.",
-    teamCount: 2,
-    maxTeamSize: 5,
-  },
-  {
-    title: "Portfolio Website Builder",
-    category: "Design Tool",
-    status: "Completed",
-    description: "A drag-and-drop tool for freelancers to build portfolio websites.",
-    skills: ["React", "Figma"],
-    owner: "Ayesha K.",
-    teamCount: 3,
-    maxTeamSize: 3,
-  },
-];
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function MyProjects() {
+  const { user } = useAuth();
+  const [myProjects, setMyProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMyProjects() {
+      try {
+        const response = await api.get("/projects");
+        const filtered = response.data.projects.filter((p) => p.owner._id === user.id);
+        setMyProjects(filtered);
+      } catch (error) {
+        console.error("Failed to load projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMyProjects();
+  }, [user]);
+
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "24px",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "var(--font-size-h2)", fontWeight: "700" }}>My Projects</h1>
         <Link
           to="/projects/create"
@@ -53,16 +43,12 @@ function MyProjects() {
         </Link>
       </div>
 
-      {myProjects.length > 0 ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "20px",
-          }}
-        >
+      {loading ? (
+        <p style={{ textAlign: "center", color: "var(--color-text-secondary)" }}>Loading...</p>
+      ) : myProjects.length > 0 ? (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
           {myProjects.map((project) => (
-            <ProjectCard key={project.title} project={project} />
+            <ProjectCard key={project._id} project={project} />
           ))}
         </div>
       ) : (
@@ -70,13 +56,7 @@ function MyProjects() {
           <p style={{ marginBottom: "16px" }}>You haven't created any projects yet.</p>
           <Link
             to="/projects/create"
-            style={{
-              background: "var(--color-primary)",
-              color: "#fff",
-              padding: "10px 20px",
-              borderRadius: "var(--radius-sm)",
-              fontWeight: "600",
-            }}
+            style={{ background: "var(--color-primary)", color: "#fff", padding: "10px 20px", borderRadius: "var(--radius-sm)", fontWeight: "600" }}
           >
             Create Your First Project
           </Link>
