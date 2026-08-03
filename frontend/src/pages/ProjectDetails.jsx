@@ -193,9 +193,14 @@ function ProjectDetails() {
               borderBottom: "1px solid var(--color-border)",
             }}
           >
-            <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600", marginBottom: "10px" }}>
-              Team Members
-            </h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <h3 style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>Team Members</h3>
+              {(isOwner || isMember) && (
+                <Link to={`/projects/${id}/chat`} style={{ fontSize: "var(--font-size-caption)", color: "var(--color-primary)", fontWeight: "600" }}>
+                  💬 Open Team Chat
+                </Link>
+              )}
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div

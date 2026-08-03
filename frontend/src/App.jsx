@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
+import TeamChat from "./pages/TeamChat";
 import CreateProject from "./pages/CreateProject";
 import EditProject from "./pages/EditProject";
 import Feed from "./pages/Feed";
@@ -65,6 +66,14 @@ function App() {
           }
         />
         <Route path="/projects/:id" element={<ProjectDetails />} />
+        <Route
+          path="/projects/:id/chat"
+          element={
+            <ProtectedRoute>
+              <TeamChat />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/feed" element={<Feed />} />
 
         {/* Dashboard routes — all share the Sidebar layout */}
