@@ -31,8 +31,10 @@ function TeamChat() {
     fetchInitialData();
   }, [id]);
 
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
   useEffect(() => {
-    const socket = connectSocket();
+    const socket = connectSocket(user.name);
     if (!socket) return;
 
     socket.emit("join_room", id);
@@ -41,8 +43,13 @@ function TeamChat() {
       setMessages((prev) => [...prev, message]);
     });
 
+    socket.on("online_users", (users) => {
+      setOnlineUsers(users);
+    });
+
     return () => {
       socket.off("receive_message");
+      socket.off("online_users");
       disconnectSocket();
     };
   }, [id]);
@@ -102,8 +109,29 @@ function TeamChat() {
             height: "500px",
           }}
         >
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--color-border)" }}>
-            <h2 style={{ fontSize: "var(--font-size-h4)", fontWeight: "700" }}>{project.title} — Team Chat</h2>
+         <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--color-border)" }}>
+            <h2 style={{ fontSize: "var(--font-size-h4)", fontWeight: "700", marginBottom: "6px" }}>
+              {project.title} — Team Chat
+            </h2>
+            {onlineUsers.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                {onlineUsers.map((name) => (
+                  <span
+                    key={name}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "var(--font-size-caption)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-success)", display: "inline-block" }} />
+                    {name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>

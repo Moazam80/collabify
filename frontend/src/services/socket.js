@@ -2,12 +2,12 @@ import { io } from "socket.io-client";
 
 let socket = null;
 
-export function connectSocket() {
+export function connectSocket(userName) {
   const token = localStorage.getItem("collabify_token");
   if (!token) return null;
 
   socket = io("http://localhost:5000", {
-    auth: { token },
+    auth: { token, userName },
   });
 
   return socket;
