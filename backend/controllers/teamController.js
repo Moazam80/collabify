@@ -1,7 +1,7 @@
 const Project = require("../models/Project");
 const TeamMember = require("../models/TeamMember");
 const JoinRequest = require("../models/JoinRequest");
-
+const Notification = require("../models/Notification");
 // POST /api/projects/:id/join-requests — request to join a project
 async function requestToJoin(req, res) {
   try {
@@ -27,11 +27,17 @@ async function requestToJoin(req, res) {
     if (existingRequest) {
       return res.status(400).json({ success: false, message: "You already have a pending request for this project." });
     }
-
-    const request = await JoinRequest.create({
+const request = await JoinRequest.create({
       project: project._id,
       user: req.userId,
       message: req.body.message || "",
+    });
+
+    await Notification.create({
+      recipient: project.owner,
+      sender: req.userId,
+      type: "join_request",
+      project: project._id,
     });
 
     res.status(201).json({ success: true, message: "Join request sent.", request });
@@ -75,7 +81,7 @@ async function acceptRequest(req, res) {
       return res.status(403).json({ success: false, message: "Not authorized." });
     }
 
-    await TeamMember.create({
+   await TeamMember.create({
       project: request.project._id,
       user: request.user,
       role: "Team Member",
@@ -83,6 +89,13 @@ async function acceptRequest(req, res) {
 
     request.status = "accepted";
     await request.save();
+
+    await Notification.create({
+      recipient: request.user,
+      sender: req.userId,
+      type: "request_accepted",
+      project: request.project._id,
+    });
 
     res.status(200).json({ success: true, message: "Request accepted." });
   } catch (error) {

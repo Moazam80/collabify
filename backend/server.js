@@ -54,6 +54,9 @@ app.use("/api/users", followRoutes);
 const messageRoutes = require("./routes/messageRoutes");
 app.use("/api", messageRoutes);
 
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
+
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 
