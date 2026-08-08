@@ -51,6 +51,9 @@ app.use("/api/posts", postRoutes);
 const followRoutes = require("./routes/followRoutes");
 app.use("/api/users", followRoutes);
 
+const messageRoutes = require("./routes/messageRoutes");
+app.use("/api", messageRoutes);
+
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 

@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { connectSocket, getSocket, disconnectSocket } from "../services/socket";
 
 function TeamChat() {
   const { id } = useParams();
@@ -14,17 +15,36 @@ function TeamChat() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    async function fetchProject() {
+    async function fetchInitialData() {
       try {
-        const response = await api.get(`/projects/${id}`);
-        setProject(response.data.project);
+        const projectRes = await api.get(`/projects/${id}`);
+        setProject(projectRes.data.project);
+
+        const messagesRes = await api.get(`/projects/${id}/messages`);
+        setMessages(messagesRes.data.messages);
       } catch (error) {
-        console.error("Failed to load project:", error);
+        console.error("Failed to load chat:", error);
       } finally {
         setLoading(false);
       }
     }
-    fetchProject();
+    fetchInitialData();
+  }, [id]);
+
+  useEffect(() => {
+    const socket = connectSocket();
+    if (!socket) return;
+
+    socket.emit("join_room", id);
+
+    socket.on("receive_message", (message) => {
+      setMessages((prev) => [...prev, message]);
+    });
+
+    return () => {
+      socket.off("receive_message");
+      disconnectSocket();
+    };
   }, [id]);
 
   useEffect(() => {
@@ -35,8 +55,10 @@ function TeamChat() {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    // Placeholder — real-time sending will be connected in Step 16.4
-    setMessages([...messages, { id: Date.now(), sender: user.name, text: newMessage, isMine: true }]);
+    const socket = getSocket();
+    if (socket) {
+      socket.emit("send_message", { projectId: id, text: newMessage });
+    }
     setNewMessage("");
   }
 
@@ -80,73 +102,54 @@ function TeamChat() {
             height: "500px",
           }}
         >
-          {/* Chat Header */}
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--color-border)" }}>
             <h2 style={{ fontSize: "var(--font-size-h4)", fontWeight: "700" }}>{project.title} — Team Chat</h2>
           </div>
 
-          {/* Messages Area */}
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
             {messages.length === 0 ? (
               <p style={{ textAlign: "center", color: "var(--color-text-secondary)", fontSize: "var(--font-size-small)", marginTop: "40px" }}>
                 No messages yet. Say hello to your team!
               </p>
             ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    alignSelf: msg.isMine ? "flex-end" : "flex-start",
-                    maxWidth: "70%",
-                  }}
-                >
-                  {!msg.isMine && (
-                    <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)", marginBottom: "2px" }}>
-                      {msg.sender}
-                    </p>
-                  )}
-                  <div
-                    style={{
-                      background: msg.isMine ? "var(--color-primary)" : "var(--color-background-alt)",
-                      color: msg.isMine ? "#fff" : "var(--color-text-primary)",
-                      padding: "10px 14px",
-                      borderRadius: "var(--radius-sm)",
-                      fontSize: "var(--font-size-small)",
-                    }}
-                  >
-                    {msg.text}
+              messages.map((msg) => {
+                const isMine = msg.sender._id === user.id;
+                return (
+                  <div key={msg._id} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
+                    {!isMine && (
+                      <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)", marginBottom: "2px" }}>
+                        {msg.sender.name}
+                      </p>
+                    )}
+                    <div
+                      style={{
+                        background: isMine ? "var(--color-primary)" : "var(--color-background-alt)",
+                        color: isMine ? "#fff" : "var(--color-text-primary)",
+                        padding: "10px 14px",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "var(--font-size-small)",
+                      }}
+                    >
+                      {msg.text}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
           <form onSubmit={handleSend} style={{ display: "flex", gap: "8px", padding: "16px 20px", borderTop: "1px solid var(--color-border)" }}>
             <input
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message..."
-              style={{
-                flex: 1,
-                padding: "10px 14px",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-                fontSize: "var(--font-size-small)",
-              }}
+              style={{ flex: 1, padding: "10px 14px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", fontSize: "var(--font-size-small)" }}
             />
             <button
               type="submit"
-              style={{
-                background: "var(--color-primary)",
-                color: "#fff",
-                padding: "10px 20px",
-                borderRadius: "var(--radius-sm)",
-                fontWeight: "600",
-                fontSize: "var(--font-size-small)",
-              }}
+              style={{ background: "var(--color-primary)", color: "#fff", padding: "10px 20px", borderRadius: "var(--radius-sm)", fontWeight: "600", fontSize: "var(--font-size-small)" }}
             >
               Send
             </button>
