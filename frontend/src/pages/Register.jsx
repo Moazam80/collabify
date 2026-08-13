@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";   
 import api from "../services/api";
 import Navbar from "../components/Navbar";
 
 function Register() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,6 +13,7 @@ function Register() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,14 +31,16 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/register", {
+      await api.post("/auth/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password,
       });
-      console.log("Registered:", response.data);
       setLoading(false);
-      // Real redirect to login/dashboard will be refined in Step 14.3
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (err) {
       setLoading(false);
       setError(err.response?.data?.message || "Something went wrong. Please try again.");
@@ -102,6 +106,21 @@ function Register() {
               }}
             >
               ⚠ {error}
+            </div>
+          )}
+          {success && (
+            <div
+              style={{
+                background: "#DCFCE7",
+                border: "1px solid var(--color-success)",
+                color: "#166534",
+                padding: "12px 16px",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "var(--font-size-small)",
+                marginBottom: "16px",
+              }}
+            >
+              ✅ Account created successfully! Redirecting to login...
             </div>
           )}
 
