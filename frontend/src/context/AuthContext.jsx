@@ -14,6 +14,12 @@ export function AuthProvider({ children }) {
     setUser(userData);
   }
 
+ function updateUser(updatedFields) {
+    const newUser = { ...user, ...updatedFields };
+    localStorage.setItem("collabify_user", JSON.stringify(newUser));
+    setUser(newUser);
+  }
+
   function logout() {
     localStorage.removeItem("collabify_token");
     localStorage.removeItem("collabify_user");
@@ -21,7 +27,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function EditProfile() {
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
@@ -12,10 +14,13 @@ function EditProfile() {
     githubUrl: "",
     linkedinUrl: "",
   });
-  const [loading, setLoading] = useState(false);
+ const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [success, setSuccess] = useState(false);
-
+  const [profilePicture, setProfilePicture] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [uploadingPicture, setUploadingPicture] = useState(false);
   useEffect(() => {
     async function fetchProfile() {
       try {
@@ -28,6 +33,7 @@ function EditProfile() {
           githubUrl: user.githubUrl || "",
           linkedinUrl: user.linkedinUrl || "",
         });
+        setProfilePicture(user.profilePicture || "");
       } catch (error) {
         console.error("Failed to load profile:", error);
       } finally {
@@ -36,11 +42,46 @@ function EditProfile() {
     }
     fetchProfile();
   }, []);
-
-  function handleChange(e) {
+function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  }
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  }
+
+  async function handleUploadPicture() {
+    if (!selectedFile) return;
+
+    setUploadingPicture(true);
+    const uploadData = new FormData();
+    uploadData.append("profilePicture", selectedFile);
+
+    try {
+     const response = await api.post("/users/me/picture", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setProfilePicture(response.data.user.profilePicture);
+      updateUser({ profilePicture: response.data.user.profilePicture });
+      setSelectedFile(null);
+      setPreviewUrl("");
+    } catch (error) {
+      console.error("Failed to upload picture:", error);
+    } finally {
+      setUploadingPicture(false);
+    }
+  }
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
@@ -118,6 +159,64 @@ function EditProfile() {
             </div>
           )}
 
+          <div style={{ marginBottom: "24px", textAlign: "center" }}>
+            <div
+              style={{
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+                background: "var(--color-primary-light)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 12px auto",
+                overflow: "hidden",
+                fontSize: "28px",
+                fontWeight: "700",
+                color: "var(--color-primary)",
+              }}
+            >
+              {previewUrl ? (
+                <img src={previewUrl} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : profilePicture ? (
+                <img
+                  src={`http://localhost:5000${profilePicture}`}
+                  alt="Profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                formData.name.charAt(0)
+              )}
+            </div>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              style={{ fontSize: "var(--font-size-caption)", marginBottom: "8px" }}
+            />
+
+            {selectedFile && (
+              <div>
+                <button
+                  type="button"
+                  onClick={handleUploadPicture}
+                  disabled={uploadingPicture}
+                  style={{
+                    background: "var(--color-primary)",
+                    color: "#fff",
+                    padding: "6px 16px",
+                    borderRadius: "var(--radius-sm)",
+                    fontSize: "var(--font-size-caption)",
+                    fontWeight: "600",
+                    marginTop: "8px",
+                  }}
+                >
+                  {uploadingPicture ? "Uploading..." : "Upload Picture"}
+                </button>
+              </div>
+            )}
+          </div>
           <div style={{ marginBottom: "16px" }}>
             <label style={labelStyle}>Full Name</label>
             <input type="text" name="name" value={formData.name} onChange={handleChange} required style={inputStyle} />

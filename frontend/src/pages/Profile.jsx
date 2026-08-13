@@ -105,9 +105,18 @@ function Profile() {
               fontWeight: "700",
               color: "var(--color-primary)",
               flexShrink: 0,
+              overflow: "hidden",
             }}
           >
-            {profileUser.name.charAt(0)}
+            {profileUser.profilePicture ? (
+              <img
+                src={`http://localhost:5000${profileUser.profilePicture}`}
+                alt={profileUser.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              profileUser.name.charAt(0)
+            )}
           </div>
 
           <div style={{ flex: 1, minWidth: "200px" }}>

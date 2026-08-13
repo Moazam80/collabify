@@ -78,9 +78,18 @@ function Navbar() {
                 justifyContent: "center",
                 fontWeight: "700",
                 fontSize: "var(--font-size-caption)",
+                overflow: "hidden",
               }}
             >
-              {user.name.charAt(0)}
+              {user.profilePicture ? (
+                <img
+                  src={`http://localhost:5000${user.profilePicture}`}
+                  alt={user.name}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                user.name.charAt(0)
+              )}
             </div>
             {user.name}
           </Link>
