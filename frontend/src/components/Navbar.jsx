@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -53,6 +54,7 @@ function Navbar() {
       {/* Auth Section */}
       {user ? (
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <NotificationBell />
           <Link
             to="/profile"
             style={{
