@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const path = require("path");
 
 async function getMyProfile(req, res) {
   try {
@@ -27,5 +28,24 @@ async function updateMyProfile(req, res) {
     res.status(500).json({ success: false, message: "Server error." });
   }
 }
+async function uploadProfilePicture(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded." });
+    }
 
-module.exports = { getMyProfile, updateMyProfile };
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      { profilePicture: imageUrl },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({ success: true, message: "Profile picture updated.", user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+}
+
+module.exports = { getMyProfile, updateMyProfile, uploadProfilePicture };
