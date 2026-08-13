@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-
 const dummyUserProjects = [
   {
     title: "Portfolio Website Builder",
@@ -137,7 +137,24 @@ function Profile() {
           </div>
         </div>
 
-        {!isOwnProfile && (
+        {isOwnProfile ? (
+          <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
+            <Link
+              to="/profile/edit"
+              style={{
+                background: "var(--color-primary)",
+                color: "#fff",
+                padding: "10px 24px",
+                borderRadius: "var(--radius-sm)",
+                fontWeight: "600",
+                fontSize: "var(--font-size-small)",
+                display: "inline-block",
+              }}
+            >
+              Edit Profile
+            </Link>
+          </div>
+        ) : (
           <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
             <button
               onClick={handleFollowToggle}
