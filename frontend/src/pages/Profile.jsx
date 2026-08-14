@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+
 const dummyUserProjects = [
   {
     title: "Portfolio Website Builder",
@@ -17,16 +18,21 @@ const dummyUserProjects = [
 ];
 
 function Profile() {
+  const { userId } = useParams();
   const { user: currentUser } = useAuth();
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
 
+  const isOwnProfile = !userId || (currentUser && userId === currentUser.id);
+
   useEffect(() => {
     async function fetchProfile() {
+      setLoading(true);
       try {
-        const response = await api.get("/users/me");
+        const endpoint = isOwnProfile ? "/users/me" : `/users/${userId}`;
+        const response = await api.get(endpoint);
         const fetchedUser = response.data.user;
         setProfileUser(fetchedUser);
 
@@ -35,12 +41,13 @@ function Profile() {
         setIsFollowing(statusRes.data.isFollowing);
       } catch (error) {
         console.error("Failed to load profile:", error);
+        setProfileUser(null);
       } finally {
         setLoading(false);
       }
     }
     fetchProfile();
-  }, []);
+  }, [userId, isOwnProfile]);
 
   async function handleFollowToggle() {
     try {
@@ -70,12 +77,12 @@ function Profile() {
     return (
       <div>
         <Navbar />
-        <div style={{ textAlign: "center", padding: "80px" }}>Please log in to view your profile.</div>
+        <div style={{ textAlign: "center", padding: "80px" }}>
+          {isOwnProfile ? "Please log in to view your profile." : "User not found."}
+        </div>
       </div>
     );
   }
-
-  const isOwnProfile = currentUser && profileUser._id === currentUser.id;
 
   return (
     <div>
@@ -163,7 +170,7 @@ function Profile() {
               Edit Profile
             </Link>
           </div>
-        ) : (
+        ) : currentUser ? (
           <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
             <button
               onClick={handleFollowToggle}
@@ -180,7 +187,7 @@ function Profile() {
               {isFollowing ? "✓ Following" : "+ Follow"}
             </button>
           </div>
-        )}
+        ) : null}
 
         <div style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "24px", marginTop: "24px" }}>
           <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>Skills</h3>
@@ -209,16 +216,18 @@ function Profile() {
           </div>
         </div>
 
-        <div style={{ marginTop: "24px" }}>
-          <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
-            Project Portfolio
-          </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
-            {dummyUserProjects.map((project) => (
-              <ProjectCard key={project.title} project={project} />
-            ))}
+        {isOwnProfile && (
+          <div style={{ marginTop: "24px" }}>
+            <h3 style={{ fontSize: "var(--font-size-h4)", fontWeight: "600", marginBottom: "16px" }}>
+              Project Portfolio
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
+              {dummyUserProjects.map((project) => (
+                <ProjectCard key={project.title} project={project} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/profile/:userId" element={<Profile />} />
         <Route
           path="/profile/edit"
           element={

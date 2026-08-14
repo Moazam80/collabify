@@ -221,7 +221,9 @@ function ProjectDetails() {
                   {project.owner.name.charAt(0)}
                 </div>
                 <div>
-                  <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>{project.owner.name}</p>
+                  <Link to={`/profile/${project.owner._id}`} style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>
+                    {project.owner.name}
+                  </Link>
                   <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
                     Project Owner
                   </p>
@@ -251,8 +253,10 @@ function ProjectDetails() {
                     >
                       {member.user.name.charAt(0)}
                     </div>
-                    <div>
-                      <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>{member.user.name}</p>
+                   <div>
+                      <Link to={`/profile/${member.user._id}`} style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>
+                        {member.user.name}
+                      </Link>
                       <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-text-secondary)" }}>
                         {member.role}
                       </p>
