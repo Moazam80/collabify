@@ -125,6 +125,7 @@ function Feed() {
               post={{
                 ...post,
                 author: post.author.name,
+                authorPicture: post.author.profilePicture,
                 liked: user ? post.likes.includes(user.id) : false,
                 onLike: handleLike,
                 onAddComment: handleAddComment,

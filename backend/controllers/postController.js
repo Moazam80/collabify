@@ -6,13 +6,13 @@ async function getAllPosts(req, res) {
   try {
     const posts = await Post.find()
       .sort({ createdAt: -1 })
-      .populate("author", "name");
+      .populate("author", "name profilePicture");
 
     const postsWithComments = await Promise.all(
       posts.map(async (post) => {
         const comments = await Comment.find({ post: post._id })
           .sort({ createdAt: 1 })
-          .populate("author", "name");
+          .populate("author", "name profilePicture");
         return { ...post.toObject(), commentsList: comments };
       })
     );
@@ -32,8 +32,7 @@ async function createPost(req, res) {
     }
 
     const post = await Post.create({ author: req.userId, content });
-    const populatedPost = await post.populate("author", "name");
-
+    const populatedPost = await post.populate("author", "name profilePicture");
     res.status(201).json({ success: true, post: { ...populatedPost.toObject(), commentsList: [] } });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error." });
@@ -94,8 +93,7 @@ async function addComment(req, res) {
       author: req.userId,
       text,
     });
-    const populatedComment = await comment.populate("author", "name");
-
+   const populatedComment = await comment.populate("author", "name profilePicture");
     res.status(201).json({ success: true, comment: populatedComment });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error." });

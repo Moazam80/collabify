@@ -46,9 +46,14 @@ function PostCard({ post }) {
             fontWeight: "700",
             fontSize: "var(--font-size-small)",
             flexShrink: 0,
+            overflow: "hidden",
           }}
         >
-          {post.author.charAt(0)}
+          {post.authorPicture ? (
+            <img src={`http://localhost:5000${post.authorPicture}`} alt={post.author} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            post.author.charAt(0)
+          )}
         </div>
         <div>
           <p style={{ fontSize: "var(--font-size-small)", fontWeight: "600" }}>{post.author}</p>
@@ -115,9 +120,18 @@ function PostCard({ post }) {
                     fontSize: "var(--font-size-caption)",
                     fontWeight: "700",
                     flexShrink: 0,
+                    overflow: "hidden",
                   }}
                 >
-                  {comment.author.name.charAt(0)}
+                  {comment.author.profilePicture ? (
+                    <img
+                      src={`http://localhost:5000${comment.author.profilePicture}`}
+                      alt={comment.author.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    comment.author.name.charAt(0)
+                  )}
                 </div>
                 <div style={{ background: "var(--color-background-alt)", borderRadius: "var(--radius-sm)", padding: "8px 12px", flex: 1 }}>
                   <p style={{ fontSize: "var(--font-size-caption)", fontWeight: "600" }}>{comment.author.name}</p>
