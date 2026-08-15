@@ -4,9 +4,9 @@ const Message = require("./models/Message");
 const Conversation = require("./models/Conversation");
 
 function setupSocket(httpServer) {
-  const io = new Server(httpServer, {
+ const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: ["http://localhost:5173", "https://collabify-t2a6.vercel.app"],
       credentials: true,
     },
   });
