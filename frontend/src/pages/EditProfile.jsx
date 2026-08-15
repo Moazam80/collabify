@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { getImageUrl } from "../utils/getImageUrl";
 
 function EditProfile() {
   const navigate = useNavigate();
@@ -180,7 +181,7 @@ function handleChange(e) {
                 <img src={previewUrl} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : profilePicture ? (
                 <img
-                  src={`http://localhost:5000${profilePicture}`}
+                  src={getImageUrl(profilePicture)}
                   alt="Profile"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />

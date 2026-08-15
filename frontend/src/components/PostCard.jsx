@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getImageUrl } from "../utils/getImageUrl";
 
 function timeAgo(dateString) {
   const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
@@ -50,7 +51,7 @@ function PostCard({ post }) {
           }}
         >
           {post.authorPicture ? (
-            <img src={`http://localhost:5000${post.authorPicture}`} alt={post.author} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={getImageUrl(post.authorPicture)} alt={post.author} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             post.author.charAt(0)
           )}
@@ -125,7 +126,7 @@ function PostCard({ post }) {
                 >
                   {comment.author.profilePicture ? (
                     <img
-                      src={`http://localhost:5000${comment.author.profilePicture}`}
+                      src={getImageUrl(comment.author.profilePicture)}
                       alt={comment.author.name}
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />

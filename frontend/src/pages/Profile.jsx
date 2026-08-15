@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const dummyUserProjects = [
   {
@@ -117,7 +118,7 @@ function Profile() {
           >
             {profileUser.profilePicture ? (
               <img
-                src={`http://localhost:5000${profileUser.profilePicture}`}
+                src={getImageUrl(profileUser.profilePicture)}
                 alt={profileUser.name}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
